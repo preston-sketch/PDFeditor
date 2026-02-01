@@ -263,6 +263,90 @@ const PDFMerge = (() => {
     await PDFEditor.reorderPage(doc.currentPage, doc.currentPage + 1);
   }
 
+  // ---- Split PDF Dialog ----
+
+  function showSplitDialog() {
+    const doc = PDFViewer.getActiveDoc();
+    if (!doc) {
+      UI.showDialog({ title: 'Split', message: 'No document open.', icon: 'ℹ️', buttons: ['OK'] });
+      return;
+    }
+
+    if (doc.pageCount < 2) {
+      UI.showDialog({ title: 'Split', message: 'Document has only one page — nothing to split.', icon: 'ℹ️', buttons: ['OK'] });
+      return;
+    }
+
+    const content = `
+      <p style="margin-bottom:8px">Split the document into two new PDFs at a given page:</p>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <label style="font-size:11px;">Split after page:</label>
+        <input type="number" class="win98-input" id="split-page" value="${Math.floor(doc.pageCount / 2)}" min="1" max="${doc.pageCount - 1}" style="width:60px;">
+        <span style="font-size:11px;">of ${doc.pageCount}</span>
+      </div>
+      <p style="margin-top:8px;font-size:11px;color:#808080;">
+        Part 1: pages 1 through N. Part 2: pages N+1 through ${doc.pageCount}.<br>
+        Both parts will open as new tabs.
+      </p>
+    `;
+
+    UI.showCustomDialog({
+      title: 'Split PDF',
+      content,
+      buttons: ['Split', 'Cancel'],
+      onButton: async (btn, dialog) => {
+        if (btn === 'Split') {
+          const splitPage = parseInt(dialog.querySelector('#split-page').value);
+          if (isNaN(splitPage) || splitPage < 1 || splitPage >= doc.pageCount) {
+            UI.showDialog({ title: 'Split', message: 'Invalid split page number.', icon: '⚠️', buttons: ['OK'] });
+            return;
+          }
+          await executeSplit(splitPage);
+        }
+      }
+    });
+  }
+
+  async function executeSplit(splitAfterPage) {
+    const doc = PDFViewer.getActiveDoc();
+    if (!doc) return;
+
+    UI.setStatus('Splitting PDF...');
+    document.body.classList.add('wait-cursor');
+
+    try {
+      const { PDFDocument } = PDFLib;
+      const srcDoc = await PDFDocument.load(doc.pdfBytes);
+
+      // Part 1: pages 0..splitAfterPage-1
+      const part1 = await PDFDocument.create();
+      const indices1 = Array.from({ length: splitAfterPage }, (_, i) => i);
+      const pages1 = await part1.copyPages(srcDoc, indices1);
+      pages1.forEach(p => part1.addPage(p));
+
+      // Part 2: pages splitAfterPage..end
+      const part2 = await PDFDocument.create();
+      const indices2 = Array.from({ length: srcDoc.getPageCount() - splitAfterPage }, (_, i) => i + splitAfterPage);
+      const pages2 = await part2.copyPages(srcDoc, indices2);
+      pages2.forEach(p => part2.addPage(p));
+
+      const bytes1 = await part1.save();
+      const bytes2 = await part2.save();
+
+      const baseName = doc.name.replace('.pdf', '');
+      await PDFViewer.loadPDF(bytes1.buffer, `${baseName}_part1.pdf`);
+      await PDFViewer.loadPDF(bytes2.buffer, `${baseName}_part2.pdf`);
+
+      UI.setStatus('Split complete.');
+    } catch (err) {
+      console.error('Split error:', err);
+      UI.showDialog({ title: 'Error', message: 'Failed to split PDF:\n' + err.message, icon: '❌', buttons: ['OK'] });
+      UI.setStatus('Ready.');
+    } finally {
+      document.body.classList.remove('wait-cursor');
+    }
+  }
+
   // ---- Helpers ----
 
   function escapeHtml(str) {
@@ -274,6 +358,7 @@ const PDFMerge = (() => {
   return {
     showMergeDialog,
     showExtractDialog,
+    showSplitDialog,
     movePageUp,
     movePageDown,
   };

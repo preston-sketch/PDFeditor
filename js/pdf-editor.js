@@ -311,10 +311,8 @@ const PDFEditor = (() => {
     const action = undoStack.pop();
     redoStack.push(action);
 
-    if (action.type === 'delete' || action.type === 'reorder') {
-      if (action.prevBytes) {
-        await PDFViewer.refreshDocument(action.prevBytes);
-      }
+    if (action.prevBytes) {
+      await PDFViewer.refreshDocument(action.prevBytes);
     } else if (action.type === 'add-text') {
       textBoxes = textBoxes.filter(b => b.id !== action.box.id);
       const doc = PDFViewer.getActiveDoc();
@@ -381,5 +379,6 @@ const PDFEditor = (() => {
     redo,
     onPageRendered,
     createTextBox,
+    pushUndo,
   };
 })();

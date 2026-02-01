@@ -78,12 +78,20 @@
   overflow: hidden;
 }
 
+/* Sidebar Tools Wrapper (scrollable) */
+.sidebar-tools-wrapper {
+  overflow-y: auto;
+  flex-shrink: 0;
+  max-height: 50vh;
+  border-bottom: 1px solid var(--win98-button-shadow);
+}
+
 /* Sidebar Tools */
 .sidebar-tools-body {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 4px;
+  gap: 2px;
+  padding: 2px 4px 4px;
 }
 
 .sidebar-tool-btn {
@@ -95,6 +103,23 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.sidebar-tool-btn.sub-item {
+  padding-left: 20px;
+  font-size: 11px;
+}
+
+/* Tool Group Headers */
+.tool-group > .win98-section-header {
+  padding: 2px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tool-group > .win98-section-header:hover {
+  background: var(--win98-light-grey);
 }
 
 .sidebar-section.collapsed .sidebar-tools-body {

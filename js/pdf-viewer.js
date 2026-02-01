@@ -57,12 +57,18 @@ const PDFViewer = (() => {
       await generateThumbnails(doc);
       updateUI();
 
-      UI.enableToolbarButtons([
+      const PDF_OPEN_BUTTONS = [
         'tb-save', 'tb-print', 'tb-merge', 'tb-extract', 'tb-toword',
-        'tb-zoomin', 'tb-zoomout', 'tb-fitpage', 'tb-editmode',
-        'side-merge', 'side-extract', 'side-edit', 'side-toword',
-        'side-print', 'side-save'
-      ]);
+        'tb-zoomin', 'tb-zoomout', 'tb-fitpage', 'tb-editmode', 'tb-rotate',
+        'side-merge', 'side-extract', 'side-toword',
+        'side-print', 'side-save',
+        'side-redact-draw', 'side-redact-search',
+        'side-highlight', 'side-underline', 'side-sticky', 'side-draw', 'side-stamp',
+        'side-rotate', 'side-crop', 'side-insert-blank', 'side-split', 'side-page-numbers',
+        'side-fill-fields', 'side-add-fields', 'side-flatten',
+        'side-to-images', 'side-compress'
+      ];
+      UI.enableToolbarButtons(PDF_OPEN_BUTTONS);
 
       UI.setStatus('Ready.');
     } catch (err) {
@@ -130,13 +136,19 @@ const PDFViewer = (() => {
       activeDocIndex = -1;
       showDropZone();
       updateUI();
-      UI.disableToolbarButtons([
+      const PDF_CLOSE_BUTTONS = [
         'tb-save', 'tb-print', 'tb-merge', 'tb-extract', 'tb-toword',
-        'tb-zoomin', 'tb-zoomout', 'tb-fitpage', 'tb-editmode',
+        'tb-zoomin', 'tb-zoomout', 'tb-fitpage', 'tb-editmode', 'tb-rotate',
         'tb-undo', 'tb-redo',
-        'side-merge', 'side-extract', 'side-edit', 'side-toword',
-        'side-print', 'side-save'
-      ]);
+        'side-merge', 'side-extract', 'side-toword',
+        'side-print', 'side-save',
+        'side-redact-draw', 'side-redact-search',
+        'side-highlight', 'side-underline', 'side-sticky', 'side-draw', 'side-stamp',
+        'side-rotate', 'side-crop', 'side-insert-blank', 'side-split', 'side-page-numbers',
+        'side-fill-fields', 'side-add-fields', 'side-flatten',
+        'side-to-images', 'side-compress'
+      ];
+      UI.disableToolbarButtons(PDF_CLOSE_BUTTONS);
     } else {
       activeDocIndex = Math.min(idx, openDocs.length - 1);
       switchToDocument(openDocs[activeDocIndex].id);
@@ -173,6 +185,18 @@ const PDFViewer = (() => {
       ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
 
       wrapper.appendChild(canvas);
+
+      // Annotation overlay (below text edit)
+      const annotOverlay = document.createElement('div');
+      annotOverlay.className = 'annotation-overlay';
+      annotOverlay.id = 'annotation-overlay';
+      wrapper.appendChild(annotOverlay);
+
+      // Redact overlay
+      const redactOverlay = document.createElement('div');
+      redactOverlay.className = 'redact-overlay';
+      redactOverlay.id = 'redact-overlay';
+      wrapper.appendChild(redactOverlay);
 
       // Text edit overlay
       const overlay = document.createElement('div');

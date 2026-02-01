@@ -5,6 +5,36 @@
 
 const App = (() => {
 
+  // ---- Active Mode Management ----
+  // Only one overlay mode can be active at a time: edit, redact, annotate (highlight/underline/sticky/draw)
+  let activeMode = null; // null, 'edit', 'redact', 'highlight', 'underline', 'sticky', 'draw'
+
+  function setActiveMode(mode) {
+    // Exit current mode first
+    if (activeMode === 'edit' && mode !== 'edit') {
+      PDFEditor.toggleEditMode();
+    }
+    if (activeMode === 'redact' && mode !== 'redact') {
+      PDFRedact.toggleRedactMode();
+    }
+    if (['highlight', 'underline', 'sticky', 'draw'].includes(activeMode) && !['highlight', 'underline', 'sticky', 'draw'].includes(mode)) {
+      PDFAnnotate.deactivate();
+    }
+
+    activeMode = mode;
+  }
+
+  function getActiveMode() {
+    return activeMode;
+  }
+
+  function exitAllModes() {
+    if (activeMode === 'edit') PDFEditor.toggleEditMode();
+    if (activeMode === 'redact') PDFRedact.toggleRedactMode();
+    if (['highlight', 'underline', 'sticky', 'draw'].includes(activeMode)) PDFAnnotate.deactivate();
+    activeMode = null;
+  }
+
   // ---- Initialization ----
 
   async function init() {
@@ -47,7 +77,11 @@ const App = (() => {
       'tb-zoomin': () => PDFViewer.zoomIn(),
       'tb-zoomout': () => PDFViewer.zoomOut(),
       'tb-fitpage': () => PDFViewer.setZoom('fit'),
-      'tb-editmode': () => PDFEditor.toggleEditMode(),
+      'tb-editmode': () => {
+        setActiveMode(activeMode === 'edit' ? null : 'edit');
+        if (activeMode === 'edit') PDFEditor.toggleEditMode();
+      },
+      'tb-rotate': () => PDFPages.rotatePage(90),
       'tb-gdrive': () => {
         if (Drive.getIsSignedIn()) {
           Drive.refreshHoldingCell();
@@ -67,12 +101,47 @@ const App = (() => {
 
   function bindSidebarTools() {
     const actions = {
+      // Redact
+      'side-redact-draw': () => {
+        setActiveMode(activeMode === 'redact' ? null : 'redact');
+        if (activeMode === 'redact') PDFRedact.toggleRedactMode();
+      },
+      'side-redact-search': () => PDFRedact.showSearchRedactDialog(),
+
+      // Annotate
+      'side-highlight': () => { setActiveMode('highlight'); PDFAnnotate.activate('highlight'); },
+      'side-underline': () => { setActiveMode('underline'); PDFAnnotate.activate('underline'); },
+      'side-sticky': () => { setActiveMode('sticky'); PDFAnnotate.activate('sticky'); },
+      'side-draw': () => { setActiveMode('draw'); PDFAnnotate.activate('draw'); },
+      'side-stamp': () => PDFAnnotate.showStampDialog(),
+
+      // Pages
+      'side-rotate': () => PDFPages.rotatePage(90),
+      'side-crop': () => PDFPages.showCropDialog(),
+      'side-insert-blank': () => PDFPages.insertBlankPage(),
+      'side-split': () => PDFMerge.showSplitDialog(),
+      'side-page-numbers': () => PDFPages.showPageNumbersDialog(),
+
+      // Forms
+      'side-fill-fields': () => PDFForms.showFillDialog(),
+      'side-add-fields': () => PDFForms.toggleAddFieldMode(),
+      'side-flatten': () => PDFForms.flattenForm(),
+
+      // Convert
+      'side-toword': () => PDFConvert.convertToWord(),
+      'side-to-images': () => PDFConvert.convertToImages(),
+      'side-from-images': () => PDFConvert.imagesToPDF(),
+
+      // Merge & Extract
       'side-merge': () => PDFMerge.showMergeDialog(),
       'side-extract': () => PDFMerge.showExtractDialog(),
-      'side-edit': () => PDFEditor.toggleEditMode(),
-      'side-toword': () => PDFConvert.convertToWord(),
-      'side-print': () => printPDF(),
+
+      // Compress
+      'side-compress': () => PDFConvert.compressPDF(),
+
+      // Save & Print
       'side-save': () => saveFile(),
+      'side-print': () => printPDF(),
     };
 
     Object.entries(actions).forEach(([id, handler]) => {
@@ -100,10 +169,23 @@ const App = (() => {
         'delete-page': () => deletePage(),
 
         // Tools
+        'edit-mode': () => {
+          setActiveMode(activeMode === 'edit' ? null : 'edit');
+          if (activeMode === 'edit') PDFEditor.toggleEditMode();
+        },
+        'rotate': () => PDFPages.rotatePage(90),
+        'redact-mode': () => {
+          setActiveMode(activeMode === 'redact' ? null : 'redact');
+          if (activeMode === 'redact') PDFRedact.toggleRedactMode();
+        },
+        'search-redact': () => PDFRedact.showSearchRedactDialog(),
         'merge': () => PDFMerge.showMergeDialog(),
         'extract': () => PDFMerge.showExtractDialog(),
+        'split': () => PDFMerge.showSplitDialog(),
         'to-word': () => PDFConvert.convertToWord(),
-        'edit-mode': () => PDFEditor.toggleEditMode(),
+        'to-images': () => PDFConvert.convertToImages(),
+        'from-images': () => PDFConvert.imagesToPDF(),
+        'compress': () => PDFConvert.compressPDF(),
 
         // View
         'zoom-in': () => PDFViewer.zoomIn(),
@@ -128,6 +210,7 @@ const App = (() => {
       const action = e.detail.action;
       const handlers = {
         // Page context menu
+        'ctx-rotate': () => PDFPages.rotatePage(90),
         'ctx-extract': () => {
           const pages = PDFViewer.getSelectedPages();
           if (pages.length > 0) {
@@ -189,9 +272,7 @@ const App = (() => {
       // Don't intercept when typing in inputs
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.contentEditable === 'true') {
         if (e.key === 'Escape') {
-          if (PDFEditor.isEditMode()) {
-            PDFEditor.toggleEditMode();
-          }
+          exitAllModes();
         }
         return;
       }
@@ -222,7 +303,11 @@ const App = (() => {
         PDFEditor.selectAllPages();
       } else if (ctrl && e.key === 'e') {
         e.preventDefault();
-        PDFEditor.toggleEditMode();
+        setActiveMode(activeMode === 'edit' ? null : 'edit');
+        if (activeMode === 'edit') PDFEditor.toggleEditMode();
+      } else if (ctrl && e.key === 'r') {
+        e.preventDefault();
+        PDFPages.rotatePage(90);
       } else if (ctrl && (e.key === '=' || e.key === '+')) {
         e.preventDefault();
         PDFViewer.zoomIn();
@@ -253,9 +338,7 @@ const App = (() => {
           PDFViewer.goToPage(doc.pageCount);
         }
       } else if (e.key === 'Escape') {
-        if (PDFEditor.isEditMode()) {
-          PDFEditor.toggleEditMode();
-        }
+        exitAllModes();
       }
     });
   }
@@ -276,7 +359,6 @@ const App = (() => {
     });
 
     document.getElementById('btn-minimize').addEventListener('click', () => {
-      // Can't truly minimize a web page, just a visual nod
       UI.setStatus('Cannot minimize a web application.');
     });
 
@@ -378,13 +460,14 @@ const App = (() => {
       ['Ctrl+Y', 'Redo'],
       ['Ctrl+A', 'Select all pages'],
       ['Ctrl+E', 'Toggle edit mode'],
+      ['Ctrl+R', 'Rotate page'],
       ['Ctrl++', 'Zoom in'],
       ['Ctrl+-', 'Zoom out'],
       ['Ctrl+0', 'Fit page'],
       ['Delete', 'Delete selected pages'],
       ['←/→', 'Previous/Next page'],
       ['Home/End', 'First/Last page'],
-      ['Escape', 'Exit edit mode'],
+      ['Escape', 'Exit current mode'],
     ];
 
     const rows = shortcuts.map(([key, desc]) =>
@@ -402,9 +485,9 @@ const App = (() => {
     UI.showDialog({
       title: 'About PDFeditor 98',
       message: `<b>PDFeditor 98</b><br><br>
-        Version 1.0<br><br>
+        Version 2.0<br><br>
         A Windows 98-inspired PDF editor.<br>
-        Open, view, edit, merge, extract, and convert PDFs.<br><br>
+        Open, view, edit, merge, extract, convert, redact, annotate, and compress PDFs.<br><br>
         Built with PDF.js, pdf-lib, and vanilla JavaScript.<br><br>
         &copy; 2025`,
       icon: '📄',
@@ -416,5 +499,5 @@ const App = (() => {
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { init };
+  return { init, setActiveMode, getActiveMode, exitAllModes };
 })();

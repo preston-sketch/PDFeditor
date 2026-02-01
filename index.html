@@ -85,6 +85,12 @@
       </div>
       <div class="win98-toolbar-sep"></div>
       <div class="toolbar-group">
+        <button class="win98-toolbar-btn has-label" id="tb-rotate" title="Rotate Page (Ctrl+R)" disabled>
+          <span class="btn-icon">🔄</span><span class="btn-label">Rotate</span>
+        </button>
+      </div>
+      <div class="win98-toolbar-sep"></div>
+      <div class="toolbar-group">
         <button class="win98-toolbar-btn has-label" id="tb-gdrive" title="Google Drive">
           <span class="btn-icon">☁️</span><span class="btn-label">GDrive</span>
         </button>
@@ -96,24 +102,125 @@
       ✏️ Text Edit Mode — Click on the page to add text. Press Escape to exit.
     </div>
 
+    <!-- Redact Mode Banner -->
+    <div class="edit-mode-banner" id="redact-mode-banner">
+      🖊️ Redact Mode — Draw rectangles on the page to redact. Press Escape to exit.
+    </div>
+
+    <!-- Annotate Mode Banner -->
+    <div class="edit-mode-banner" id="annotate-mode-banner">
+      📝 Annotate Mode — Click on the page to add annotations. Press Escape to exit.
+    </div>
+
     <!-- Main Content -->
     <div class="app-content">
       <!-- Left Sidebar -->
       <div class="app-sidebar" id="sidebar">
-        <div class="sidebar-section" id="tools-section">
-          <div class="win98-section-header" data-section="tools">
-            <span>🔧 Tools</span>
-            <span class="collapse-icon">▾</span>
+        <div class="sidebar-tools-wrapper">
+          <!-- Redact -->
+          <div class="sidebar-section tool-group collapsed" id="tg-redact">
+            <div class="win98-section-header" data-section="tg-redact">
+              <span>🖊️ Redact</span>
+              <span class="collapse-icon">▸</span>
+            </div>
+            <div class="sidebar-tools-body">
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-redact-draw" disabled>Draw Box</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-redact-search" disabled>Search &amp; Redact</button>
+            </div>
           </div>
-          <div class="sidebar-tools-body">
-            <button class="win98-button sidebar-tool-btn" id="side-merge" disabled>📎 Merge PDFs</button>
-            <button class="win98-button sidebar-tool-btn" id="side-extract" disabled>✂️ Extract Pages</button>
-            <button class="win98-button sidebar-tool-btn" id="side-edit" disabled>✏️ Text Edit</button>
-            <button class="win98-button sidebar-tool-btn" id="side-toword" disabled>📝 To Word</button>
-            <button class="win98-button sidebar-tool-btn" id="side-print" disabled>🖨️ Print</button>
-            <button class="win98-button sidebar-tool-btn" id="side-save" disabled>💾 Save</button>
+
+          <!-- Annotate -->
+          <div class="sidebar-section tool-group collapsed" id="tg-annotate">
+            <div class="win98-section-header" data-section="tg-annotate">
+              <span>📝 Annotate</span>
+              <span class="collapse-icon">▸</span>
+            </div>
+            <div class="sidebar-tools-body">
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-highlight" disabled>Highlight</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-underline" disabled>Underline</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-sticky" disabled>Sticky Note</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-draw" disabled>Draw</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-stamp" disabled>Stamp</button>
+            </div>
+          </div>
+
+          <!-- Pages -->
+          <div class="sidebar-section tool-group collapsed" id="tg-pages">
+            <div class="win98-section-header" data-section="tg-pages">
+              <span>📄 Pages</span>
+              <span class="collapse-icon">▸</span>
+            </div>
+            <div class="sidebar-tools-body">
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-rotate" disabled>Rotate</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-crop" disabled>Crop</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-insert-blank" disabled>Insert Blank</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-split" disabled>Split</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-page-numbers" disabled>Page Numbers</button>
+            </div>
+          </div>
+
+          <!-- Forms -->
+          <div class="sidebar-section tool-group collapsed" id="tg-forms">
+            <div class="win98-section-header" data-section="tg-forms">
+              <span>📋 Forms</span>
+              <span class="collapse-icon">▸</span>
+            </div>
+            <div class="sidebar-tools-body">
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-fill-fields" disabled>Fill Fields</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-add-fields" disabled>Add Fields</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-flatten" disabled>Flatten</button>
+            </div>
+          </div>
+
+          <!-- Convert -->
+          <div class="sidebar-section tool-group collapsed" id="tg-convert">
+            <div class="win98-section-header" data-section="tg-convert">
+              <span>🔄 Convert</span>
+              <span class="collapse-icon">▸</span>
+            </div>
+            <div class="sidebar-tools-body">
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-toword" disabled>To Word</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-to-images" disabled>To Images</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-from-images">From Images</button>
+            </div>
+          </div>
+
+          <!-- Merge & Extract -->
+          <div class="sidebar-section tool-group collapsed" id="tg-merge">
+            <div class="win98-section-header" data-section="tg-merge">
+              <span>📎 Merge &amp; Extract</span>
+              <span class="collapse-icon">▸</span>
+            </div>
+            <div class="sidebar-tools-body">
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-merge" disabled>Merge PDFs</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-extract" disabled>Extract Pages</button>
+            </div>
+          </div>
+
+          <!-- Compress -->
+          <div class="sidebar-section tool-group collapsed" id="tg-compress">
+            <div class="win98-section-header" data-section="tg-compress">
+              <span>📦 Compress</span>
+              <span class="collapse-icon">▸</span>
+            </div>
+            <div class="sidebar-tools-body">
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-compress" disabled>Compress PDF</button>
+            </div>
+          </div>
+
+          <!-- Save & Print (starts expanded) -->
+          <div class="sidebar-section tool-group" id="tg-saveprint">
+            <div class="win98-section-header" data-section="tg-saveprint">
+              <span>💾 Save &amp; Print</span>
+              <span class="collapse-icon">▾</span>
+            </div>
+            <div class="sidebar-tools-body">
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-save" disabled>Save</button>
+              <button class="win98-button sidebar-tool-btn sub-item" id="side-print" disabled>Print</button>
+            </div>
           </div>
         </div>
+
         <div class="sidebar-section" id="holding-cell-section">
           <div class="win98-section-header" data-section="holding-cell">
             <span>☁️ Holding Cell</span>
@@ -210,8 +317,9 @@
     </div>
   </div>
 
-  <!-- Hidden file input -->
+  <!-- Hidden file inputs -->
   <input type="file" id="file-input" accept=".pdf" multiple style="display:none;">
+  <input type="file" id="image-file-input" accept="image/png,image/jpeg,image/jpg,image/webp" multiple style="display:none;">
 
   <!-- Menu Definitions (dropdown menus) -->
   <div class="win98-dropdown" id="menu-file">
@@ -232,12 +340,21 @@
     <div class="win98-dropdown-item" data-action="delete-page">Delete Selected Pages<span class="win98-dropdown-shortcut">Del</span></div>
   </div>
   <div class="win98-dropdown" id="menu-tools">
+    <div class="win98-dropdown-item" data-action="edit-mode">Text Edit Mode<span class="win98-dropdown-shortcut">Ctrl+E</span></div>
+    <div class="win98-dropdown-item" data-action="rotate">Rotate Page<span class="win98-dropdown-shortcut">Ctrl+R</span></div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="redact-mode">Redact Mode</div>
+    <div class="win98-dropdown-item" data-action="search-redact">Search &amp; Redact...</div>
+    <div class="win98-dropdown-separator"></div>
     <div class="win98-dropdown-item" data-action="merge">Merge PDFs...</div>
     <div class="win98-dropdown-item" data-action="extract">Extract Pages...</div>
+    <div class="win98-dropdown-item" data-action="split">Split PDF...</div>
     <div class="win98-dropdown-separator"></div>
     <div class="win98-dropdown-item" data-action="to-word">Convert to Word...</div>
+    <div class="win98-dropdown-item" data-action="to-images">Export as Images...</div>
+    <div class="win98-dropdown-item" data-action="from-images">Import Images to PDF...</div>
     <div class="win98-dropdown-separator"></div>
-    <div class="win98-dropdown-item" data-action="edit-mode">Text Edit Mode<span class="win98-dropdown-shortcut">Ctrl+E</span></div>
+    <div class="win98-dropdown-item" data-action="compress">Compress PDF...</div>
   </div>
   <div class="win98-dropdown" id="menu-view">
     <div class="win98-dropdown-item" data-action="zoom-in">Zoom In<span class="win98-dropdown-shortcut">Ctrl++</span></div>
@@ -255,6 +372,7 @@
 
   <!-- Context Menu for Page Thumbnails -->
   <div class="win98-context-menu" id="page-context-menu" style="display:none;">
+    <div class="win98-dropdown-item" data-action="ctx-rotate">Rotate 90°</div>
     <div class="win98-dropdown-item" data-action="ctx-extract">Extract Selected Pages</div>
     <div class="win98-dropdown-item" data-action="ctx-delete">Delete Selected Pages</div>
     <div class="win98-dropdown-separator"></div>
@@ -280,6 +398,10 @@
   <script src="js/file-manager.js"></script>
   <script src="js/pdf-viewer.js"></script>
   <script src="js/pdf-editor.js"></script>
+  <script src="js/pdf-pages.js"></script>
+  <script src="js/pdf-redact.js"></script>
+  <script src="js/pdf-annotate.js"></script>
+  <script src="js/pdf-forms.js"></script>
   <script src="js/pdf-merge.js"></script>
   <script src="js/pdf-convert.js"></script>
   <script src="js/drive.js"></script>

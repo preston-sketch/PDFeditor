@@ -240,3 +240,160 @@
 .selection-info-bar.visible {
   display: block;
 }
+
+/* ---- Redaction Overlay ---- */
+.redact-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 11;
+}
+
+.redact-overlay.active {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+.redact-rect {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #000;
+  cursor: pointer;
+}
+
+.redact-rect.white {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+}
+
+.redact-rect.preview {
+  background: rgba(255, 0, 0, 0.3);
+  border: 1px dashed red;
+}
+
+/* ---- Annotation Layer ---- */
+.annotation-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 9;
+}
+
+.annotation-overlay.active {
+  pointer-events: auto;
+}
+
+.annotation-highlight {
+  position: absolute;
+  background: rgba(255, 255, 0, 0.4);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.annotation-underline {
+  position: absolute;
+  border-bottom: 2px solid red;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* ---- Sticky Notes ---- */
+.sticky-note-icon {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  font-size: 20px;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 12;
+  user-select: none;
+}
+
+.sticky-note-popup {
+  position: absolute;
+  width: 180px;
+  min-height: 80px;
+  background: #FFFFE1;
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  padding: 4px;
+  z-index: 20;
+  font-size: 11px;
+  pointer-events: auto;
+}
+
+.sticky-note-popup textarea {
+  width: 100%;
+  height: 60px;
+  border: 1px solid var(--win98-button-shadow);
+  font-family: var(--win98-font);
+  font-size: 11px;
+  resize: vertical;
+  padding: 2px;
+}
+
+.sticky-note-popup .sticky-close {
+  float: right;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 0 3px;
+}
+
+/* ---- Drawing Canvas ---- */
+.draw-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.draw-canvas.active {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+/* ---- Stamp Overlay ---- */
+.stamp-text {
+  position: absolute;
+  font-size: 48px;
+  font-weight: bold;
+  color: rgba(255, 0, 0, 0.4);
+  transform: rotate(-30deg);
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+  z-index: 8;
+}
+
+/* ---- Form Field Styles ---- */
+.form-field-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 11;
+}
+
+.form-field-input {
+  position: absolute;
+  border: 1px solid #0078d4;
+  background: rgba(173, 216, 230, 0.3);
+  padding: 1px 3px;
+  font-family: var(--win98-font);
+  font-size: 11px;
+  pointer-events: auto;
+}
+
+.form-field-checkbox {
+  position: absolute;
+  pointer-events: auto;
+}
