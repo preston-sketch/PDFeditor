@@ -168,40 +168,45 @@ const PDFForms = (() => {
 
     if (addFieldMode) {
       UI.setStatus('Click on the page to add a text field. Click again to add more. Press Escape to stop.');
-      const overlay = document.getElementById('text-edit-overlay');
-      if (overlay) {
-        addFieldHandler = (e) => {
-          if (e.target !== overlay) return;
-          const rect = overlay.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          placeField(x, y);
-        };
+      addFieldHandler = (e) => {
+        if (e.target !== e.currentTarget) return;
+        const overlay = e.currentTarget;
+        const rect = overlay.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const pageNum = parseInt(overlay.dataset.page);
+        placeField(x, y, pageNum);
+      };
+      const overlays = PDFViewer.getOverlaysForType('text-edit-overlay');
+      overlays.forEach(overlay => {
         overlay.classList.add('active');
         overlay.style.cursor = 'crosshair';
         overlay.addEventListener('click', addFieldHandler);
-      }
+      });
     } else {
       UI.setStatus('Ready.');
-      const overlay = document.getElementById('text-edit-overlay');
-      if (overlay && addFieldHandler) {
-        overlay.removeEventListener('click', addFieldHandler);
-        overlay.classList.remove('active');
-        overlay.style.cursor = '';
+      if (addFieldHandler) {
+        const overlays = PDFViewer.getOverlaysForType('text-edit-overlay');
+        overlays.forEach(overlay => {
+          overlay.removeEventListener('click', addFieldHandler);
+          overlay.classList.remove('active');
+          overlay.style.cursor = '';
+        });
         addFieldHandler = null;
       }
     }
   }
 
-  async function placeField(x, y) {
+  async function placeField(x, y, pageNum) {
     const doc = PDFViewer.getActiveDoc();
     if (!doc) return;
+    if (!pageNum) pageNum = doc.currentPage;
 
     try {
       const { PDFDocument } = PDFLib;
       const pdfDoc = await PDFDocument.load(doc.pdfBytes);
       const form = pdfDoc.getForm();
-      const page = pdfDoc.getPages()[doc.currentPage - 1];
+      const page = pdfDoc.getPages()[pageNum - 1];
       if (!page) return;
 
       const { height } = page.getSize();

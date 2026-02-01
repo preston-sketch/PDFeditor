@@ -17,10 +17,10 @@ const PDFRedact = (() => {
 
     if (redactMode) {
       banner.classList.add('visible');
-      activateOverlay();
+      activateOverlays();
     } else {
       banner.classList.remove('visible');
-      deactivateOverlay();
+      deactivateOverlays();
     }
   }
 
@@ -28,23 +28,25 @@ const PDFRedact = (() => {
     return redactMode;
   }
 
-  function activateOverlay() {
-    const overlay = document.getElementById('redact-overlay');
-    if (!overlay) return;
-    overlay.classList.add('active');
-    overlay.addEventListener('mousedown', onMouseDown);
-    overlay.addEventListener('mousemove', onMouseMove);
-    overlay.addEventListener('mouseup', onMouseUp);
+  function activateOverlays() {
+    const overlays = PDFViewer.getOverlaysForType('redact-overlay');
+    overlays.forEach(overlay => {
+      overlay.classList.add('active');
+      overlay.addEventListener('mousedown', onMouseDown);
+      overlay.addEventListener('mousemove', onMouseMove);
+      overlay.addEventListener('mouseup', onMouseUp);
+    });
     renderRedactRects();
   }
 
-  function deactivateOverlay() {
-    const overlay = document.getElementById('redact-overlay');
-    if (!overlay) return;
-    overlay.classList.remove('active');
-    overlay.removeEventListener('mousedown', onMouseDown);
-    overlay.removeEventListener('mousemove', onMouseMove);
-    overlay.removeEventListener('mouseup', onMouseUp);
+  function deactivateOverlays() {
+    const overlays = PDFViewer.getOverlaysForType('redact-overlay');
+    overlays.forEach(overlay => {
+      overlay.classList.remove('active');
+      overlay.removeEventListener('mousedown', onMouseDown);
+      overlay.removeEventListener('mousemove', onMouseMove);
+      overlay.removeEventListener('mouseup', onMouseUp);
+    });
   }
 
   // ---- Drawing Rectangles ----
@@ -55,15 +57,18 @@ const PDFRedact = (() => {
     }
     if (e.target.classList.contains('redact-rect')) return; // clicking existing rect
 
-    const overlay = document.getElementById('redact-overlay');
+    const overlay = e.currentTarget;
     const rect = overlay.getBoundingClientRect();
     isDrawing = true;
-    drawStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    drawStart = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      overlay: overlay
+    };
 
     // Create preview rect
     const preview = document.createElement('div');
     preview.className = 'redact-rect preview';
-    preview.id = 'redact-preview';
     preview.style.left = drawStart.x + 'px';
     preview.style.top = drawStart.y + 'px';
     preview.style.width = '0px';
@@ -73,12 +78,12 @@ const PDFRedact = (() => {
 
   function onMouseMove(e) {
     if (!isDrawing || !drawStart) return;
-    const overlay = document.getElementById('redact-overlay');
+    const overlay = drawStart.overlay;
     const rect = overlay.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const preview = document.getElementById('redact-preview');
+    const preview = overlay.querySelector('.redact-rect.preview');
     if (!preview) return;
 
     const left = Math.min(drawStart.x, x);
@@ -96,7 +101,7 @@ const PDFRedact = (() => {
     if (!isDrawing || !drawStart) return;
     isDrawing = false;
 
-    const overlay = document.getElementById('redact-overlay');
+    const overlay = drawStart.overlay;
     const rect = overlay.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -107,7 +112,7 @@ const PDFRedact = (() => {
     const height = Math.abs(y - drawStart.y);
 
     // Remove preview
-    const preview = document.getElementById('redact-preview');
+    const preview = overlay.querySelector('.redact-rect.preview');
     if (preview) preview.remove();
 
     // Minimum size check
@@ -116,11 +121,14 @@ const PDFRedact = (() => {
       return;
     }
 
-    const doc = PDFViewer.getActiveDoc();
-    if (!doc) return;
+    const pageNum = parseInt(overlay.dataset.page);
+    if (!pageNum) {
+      drawStart = null;
+      return;
+    }
 
     redactRects.push({
-      pageNum: doc.currentPage,
+      pageNum: pageNum,
       x: left, y: top, w: width, h: height,
       color: currentColor
     });
@@ -130,34 +138,37 @@ const PDFRedact = (() => {
   }
 
   function renderRedactRects() {
-    const overlay = document.getElementById('redact-overlay');
-    if (!overlay) return;
-
+    // Render rects on each page's overlay
     const doc = PDFViewer.getActiveDoc();
     if (!doc) return;
 
-    // Clear existing (except preview)
-    overlay.querySelectorAll('.redact-rect:not(.preview)').forEach(el => el.remove());
+    for (let p = 1; p <= doc.pageCount; p++) {
+      const overlay = PDFViewer.getOverlayForPage('redact-overlay', p);
+      if (!overlay) continue;
 
-    const pageRects = redactRects.filter(r => r.pageNum === doc.currentPage);
-    pageRects.forEach((r, idx) => {
-      const el = document.createElement('div');
-      el.className = 'redact-rect' + (r.color === 'white' ? ' white' : '');
-      el.style.left = r.x + 'px';
-      el.style.top = r.y + 'px';
-      el.style.width = r.w + 'px';
-      el.style.height = r.h + 'px';
-      el.title = 'Right-click to remove';
+      // Clear existing (except preview)
+      overlay.querySelectorAll('.redact-rect:not(.preview)').forEach(el => el.remove());
 
-      el.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        const rIdx = redactRects.indexOf(r);
-        if (rIdx !== -1) redactRects.splice(rIdx, 1);
-        renderRedactRects();
+      const pageRects = redactRects.filter(r => r.pageNum === p);
+      pageRects.forEach((r) => {
+        const el = document.createElement('div');
+        el.className = 'redact-rect' + (r.color === 'white' ? ' white' : '');
+        el.style.left = r.x + 'px';
+        el.style.top = r.y + 'px';
+        el.style.width = r.w + 'px';
+        el.style.height = r.h + 'px';
+        el.title = 'Right-click to remove';
+
+        el.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          const rIdx = redactRects.indexOf(r);
+          if (rIdx !== -1) redactRects.splice(rIdx, 1);
+          renderRedactRects();
+        });
+
+        overlay.appendChild(el);
       });
-
-      overlay.appendChild(el);
-    });
+    }
 
     // Show apply button if there are rects
     if (redactRects.length > 0 && !document.getElementById('redact-apply-bar')) {

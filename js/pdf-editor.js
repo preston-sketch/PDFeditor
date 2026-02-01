@@ -20,11 +20,11 @@ const PDFEditor = (() => {
     if (editMode) {
       banner.classList.add('visible');
       btn.classList.add('pressed');
-      activateOverlay();
+      activateOverlays();
     } else {
       banner.classList.remove('visible');
       btn.classList.remove('pressed');
-      deactivateOverlay();
+      deactivateOverlays();
     }
   }
 
@@ -32,20 +32,20 @@ const PDFEditor = (() => {
     return editMode;
   }
 
-  function activateOverlay() {
-    const overlay = document.getElementById('text-edit-overlay');
-    if (overlay) {
+  function activateOverlays() {
+    const overlays = PDFViewer.getOverlaysForType('text-edit-overlay');
+    overlays.forEach(overlay => {
       overlay.classList.add('active');
       overlay.addEventListener('click', onOverlayClick);
-    }
+    });
   }
 
-  function deactivateOverlay() {
-    const overlay = document.getElementById('text-edit-overlay');
-    if (overlay) {
+  function deactivateOverlays() {
+    const overlays = PDFViewer.getOverlaysForType('text-edit-overlay');
+    overlays.forEach(overlay => {
       overlay.classList.remove('active');
       overlay.removeEventListener('click', onOverlayClick);
-    }
+    });
   }
 
   function onOverlayClick(e) {
@@ -55,11 +55,11 @@ const PDFEditor = (() => {
     const rect = overlay.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    const pageNum = parseInt(overlay.dataset.page);
 
-    const doc = PDFViewer.getActiveDoc();
-    if (!doc) return;
+    if (!pageNum) return;
 
-    createTextBox(doc.currentPage, x, y);
+    createTextBox(pageNum, x, y);
   }
 
   // ---- Text Boxes ----
@@ -95,7 +95,7 @@ const PDFEditor = (() => {
   }
 
   function renderTextBoxes(pageNum) {
-    const overlay = document.getElementById('text-edit-overlay');
+    const overlay = PDFViewer.getOverlayForPage('text-edit-overlay', pageNum);
     if (!overlay) return;
 
     // Clear existing
@@ -160,7 +160,13 @@ const PDFEditor = (() => {
   // Called by PDFViewer when a page is rendered
   function onPageRendered(wrapper, pageNum) {
     renderTextBoxes(pageNum);
-    if (editMode) activateOverlay();
+    if (editMode) {
+      const overlay = wrapper.querySelector('.text-edit-overlay');
+      if (overlay) {
+        overlay.classList.add('active');
+        overlay.addEventListener('click', onOverlayClick);
+      }
+    }
   }
 
   // ---- Page Reordering ----

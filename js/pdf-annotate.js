@@ -17,14 +17,14 @@ const PDFAnnotate = (() => {
     const banner = document.getElementById('annotate-mode-banner');
     banner.classList.add('visible');
 
-    const overlay = document.getElementById('annotation-overlay');
-    if (overlay) {
+    const overlays = PDFViewer.getOverlaysForType('annotation-overlay');
+    overlays.forEach(overlay => {
       overlay.classList.add('active');
       overlay.style.cursor = getCursorForTool(tool);
-    }
+    });
 
     if (tool === 'draw') {
-      setupDrawCanvas();
+      setupDrawCanvases();
     }
 
     if (tool === 'highlight' || tool === 'underline') {
@@ -41,13 +41,13 @@ const PDFAnnotate = (() => {
     const banner = document.getElementById('annotate-mode-banner');
     banner.classList.remove('visible');
 
-    const overlay = document.getElementById('annotation-overlay');
-    if (overlay) {
+    const overlays = PDFViewer.getOverlaysForType('annotation-overlay');
+    overlays.forEach(overlay => {
       overlay.classList.remove('active');
       overlay.style.cursor = '';
-    }
+    });
 
-    teardownDrawCanvas();
+    teardownDrawCanvases();
     teardownAnnotClickHandler();
     teardownStickyHandler();
   }
@@ -67,21 +67,18 @@ const PDFAnnotate = (() => {
   let annotClickHandler = null;
 
   function setupAnnotClickHandler() {
-    const overlay = document.getElementById('annotation-overlay');
-    if (!overlay) return;
-
     annotClickHandler = (e) => {
-      if (e.target !== overlay) return;
+      if (e.target !== e.currentTarget) return;
+      const overlay = e.currentTarget;
       const rect = overlay.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-
-      const doc = PDFViewer.getActiveDoc();
-      if (!doc) return;
+      const pageNum = parseInt(overlay.dataset.page);
+      if (!pageNum) return;
 
       const annot = {
         type: activeAnnotTool,
-        pageNum: doc.currentPage,
+        pageNum: pageNum,
         x: x - 40,
         y: y - 4,
         w: 80,
@@ -92,44 +89,51 @@ const PDFAnnotate = (() => {
       renderAnnotations();
     };
 
-    overlay.addEventListener('click', annotClickHandler);
+    const overlays = PDFViewer.getOverlaysForType('annotation-overlay');
+    overlays.forEach(overlay => {
+      overlay.addEventListener('click', annotClickHandler);
+    });
   }
 
   function teardownAnnotClickHandler() {
-    const overlay = document.getElementById('annotation-overlay');
-    if (overlay && annotClickHandler) {
-      overlay.removeEventListener('click', annotClickHandler);
+    if (annotClickHandler) {
+      const overlays = PDFViewer.getOverlaysForType('annotation-overlay');
+      overlays.forEach(overlay => {
+        overlay.removeEventListener('click', annotClickHandler);
+      });
       annotClickHandler = null;
     }
   }
 
   function renderAnnotations() {
-    const overlay = document.getElementById('annotation-overlay');
-    if (!overlay) return;
-
     const doc = PDFViewer.getActiveDoc();
     if (!doc) return;
 
-    // Clear existing annotation elements
-    overlay.querySelectorAll('.annotation-highlight, .annotation-underline').forEach(el => el.remove());
+    for (let p = 1; p <= doc.pageCount; p++) {
+      const overlay = PDFViewer.getOverlayForPage('annotation-overlay', p);
+      if (!overlay) continue;
 
-    const pageAnnots = annotations.filter(a => a.pageNum === doc.currentPage);
-    for (const a of pageAnnots) {
-      const el = document.createElement('div');
-      el.className = a.type === 'highlight' ? 'annotation-highlight' : 'annotation-underline';
-      el.style.left = a.x + 'px';
-      el.style.top = a.y + 'px';
-      el.style.width = a.w + 'px';
-      el.style.height = a.h + 'px';
+      // Clear existing annotation elements
+      overlay.querySelectorAll('.annotation-highlight, .annotation-underline').forEach(el => el.remove());
 
-      el.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        const idx = annotations.indexOf(a);
-        if (idx !== -1) annotations.splice(idx, 1);
-        renderAnnotations();
-      });
+      const pageAnnots = annotations.filter(a => a.pageNum === p);
+      for (const a of pageAnnots) {
+        const el = document.createElement('div');
+        el.className = a.type === 'highlight' ? 'annotation-highlight' : 'annotation-underline';
+        el.style.left = a.x + 'px';
+        el.style.top = a.y + 'px';
+        el.style.width = a.w + 'px';
+        el.style.height = a.h + 'px';
 
-      overlay.appendChild(el);
+        el.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          const idx = annotations.indexOf(a);
+          if (idx !== -1) annotations.splice(idx, 1);
+          renderAnnotations();
+        });
+
+        overlay.appendChild(el);
+      }
     }
   }
 
@@ -138,20 +142,17 @@ const PDFAnnotate = (() => {
   let stickyClickHandler = null;
 
   function setupStickyHandler() {
-    const overlay = document.getElementById('annotation-overlay');
-    if (!overlay) return;
-
     stickyClickHandler = (e) => {
-      if (e.target !== overlay) return;
+      if (e.target !== e.currentTarget) return;
+      const overlay = e.currentTarget;
       const rect = overlay.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-
-      const doc = PDFViewer.getActiveDoc();
-      if (!doc) return;
+      const pageNum = parseInt(overlay.dataset.page);
+      if (!pageNum) return;
 
       stickyNotes.push({
-        pageNum: doc.currentPage,
+        pageNum: pageNum,
         x, y,
         text: '',
       });
@@ -159,58 +160,64 @@ const PDFAnnotate = (() => {
       renderStickyNotes();
     };
 
-    overlay.addEventListener('click', stickyClickHandler);
+    const overlays = PDFViewer.getOverlaysForType('annotation-overlay');
+    overlays.forEach(overlay => {
+      overlay.addEventListener('click', stickyClickHandler);
+    });
   }
 
   function teardownStickyHandler() {
-    const overlay = document.getElementById('annotation-overlay');
-    if (overlay && stickyClickHandler) {
-      overlay.removeEventListener('click', stickyClickHandler);
+    if (stickyClickHandler) {
+      const overlays = PDFViewer.getOverlaysForType('annotation-overlay');
+      overlays.forEach(overlay => {
+        overlay.removeEventListener('click', stickyClickHandler);
+      });
       stickyClickHandler = null;
     }
   }
 
   function renderStickyNotes() {
-    const overlay = document.getElementById('annotation-overlay');
-    if (!overlay) return;
-
     const doc = PDFViewer.getActiveDoc();
     if (!doc) return;
 
-    overlay.querySelectorAll('.sticky-note-icon, .sticky-note-popup').forEach(el => el.remove());
+    for (let p = 1; p <= doc.pageCount; p++) {
+      const overlay = PDFViewer.getOverlayForPage('annotation-overlay', p);
+      if (!overlay) continue;
 
-    const pageNotes = stickyNotes.filter(n => n.pageNum === doc.currentPage);
-    for (const note of pageNotes) {
-      const icon = document.createElement('div');
-      icon.className = 'sticky-note-icon';
-      icon.textContent = '📌';
-      icon.style.left = note.x + 'px';
-      icon.style.top = note.y + 'px';
+      overlay.querySelectorAll('.sticky-note-icon, .sticky-note-popup').forEach(el => el.remove());
 
-      icon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleStickyPopup(note, icon);
-      });
+      const pageNotes = stickyNotes.filter(n => n.pageNum === p);
+      for (const note of pageNotes) {
+        const icon = document.createElement('div');
+        icon.className = 'sticky-note-icon';
+        icon.textContent = '📌';
+        icon.style.left = note.x + 'px';
+        icon.style.top = note.y + 'px';
 
-      icon.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        const idx = stickyNotes.indexOf(note);
-        if (idx !== -1) stickyNotes.splice(idx, 1);
-        renderStickyNotes();
-      });
+        icon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleStickyPopup(note, icon, overlay);
+        });
 
-      overlay.appendChild(icon);
+        icon.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          const idx = stickyNotes.indexOf(note);
+          if (idx !== -1) stickyNotes.splice(idx, 1);
+          renderStickyNotes();
+        });
+
+        overlay.appendChild(icon);
+      }
     }
   }
 
-  function toggleStickyPopup(note, iconEl) {
+  function toggleStickyPopup(note, iconEl, overlay) {
     const existing = iconEl.nextElementSibling;
     if (existing && existing.classList.contains('sticky-note-popup')) {
       existing.remove();
       return;
     }
 
-    const overlay = document.getElementById('annotation-overlay');
     const popup = document.createElement('div');
     popup.className = 'sticky-note-popup';
     popup.style.left = (note.x + 28) + 'px';
@@ -232,49 +239,56 @@ const PDFAnnotate = (() => {
 
   // ---- Freehand Drawing ----
 
-  let drawCanvas = null;
-  let drawCtx = null;
+  let drawCanvases = []; // { canvas, ctx, pageNum }
 
-  function setupDrawCanvas() {
-    const wrapper = document.querySelector('.pdf-page-wrapper');
-    if (!wrapper) return;
+  function setupDrawCanvases() {
+    teardownDrawCanvases();
 
-    drawCanvas = document.createElement('canvas');
-    drawCanvas.className = 'draw-canvas active';
-    drawCanvas.width = wrapper.offsetWidth;
-    drawCanvas.height = wrapper.offsetHeight;
-    drawCanvas.style.width = wrapper.offsetWidth + 'px';
-    drawCanvas.style.height = wrapper.offsetHeight + 'px';
-    wrapper.appendChild(drawCanvas);
+    const doc = PDFViewer.getActiveDoc();
+    if (!doc) return;
 
-    drawCtx = drawCanvas.getContext('2d');
-    drawCtx.strokeStyle = '#FF0000';
-    drawCtx.lineWidth = 2;
-    drawCtx.lineCap = 'round';
-    drawCtx.lineJoin = 'round';
+    for (let p = 1; p <= doc.pageCount; p++) {
+      const wrapper = document.querySelector(`.pdf-page-wrapper[data-page="${p}"]`);
+      if (!wrapper) continue;
 
-    drawCanvas.addEventListener('mousedown', onDrawStart);
-    drawCanvas.addEventListener('mousemove', onDrawMove);
-    drawCanvas.addEventListener('mouseup', onDrawEnd);
+      const canvas = document.createElement('canvas');
+      canvas.className = 'draw-canvas active';
+      canvas.dataset.page = p;
+      canvas.width = wrapper.offsetWidth;
+      canvas.height = wrapper.offsetHeight;
+      canvas.style.width = wrapper.offsetWidth + 'px';
+      canvas.style.height = wrapper.offsetHeight + 'px';
+      wrapper.appendChild(canvas);
 
-    // Render existing paths
-    renderDrawPaths();
+      const ctx = canvas.getContext('2d');
+      ctx.strokeStyle = '#FF0000';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      canvas.addEventListener('mousedown', onDrawStart);
+      canvas.addEventListener('mousemove', onDrawMove);
+      canvas.addEventListener('mouseup', onDrawEnd);
+
+      drawCanvases.push({ canvas, ctx, pageNum: p });
+
+      // Render existing paths for this page
+      renderDrawPathsForPage(p, ctx, canvas);
+    }
   }
 
-  function teardownDrawCanvas() {
-    if (drawCanvas) {
-      drawCanvas.remove();
-      drawCanvas = null;
-      drawCtx = null;
-    }
+  function teardownDrawCanvases() {
+    drawCanvases.forEach(({ canvas }) => canvas.remove());
+    drawCanvases = [];
   }
 
   function onDrawStart(e) {
     isDrawing = true;
-    const rect = drawCanvas.getBoundingClientRect();
-    const doc = PDFViewer.getActiveDoc();
+    const canvas = e.currentTarget;
+    const rect = canvas.getBoundingClientRect();
+    const pageNum = parseInt(canvas.dataset.page) || 1;
     currentPath = {
-      pageNum: doc ? doc.currentPage : 1,
+      pageNum: pageNum,
       points: [{ x: e.clientX - rect.left, y: e.clientY - rect.top }],
       color: '#FF0000',
       width: 2,
@@ -283,17 +297,19 @@ const PDFAnnotate = (() => {
 
   function onDrawMove(e) {
     if (!isDrawing || !currentPath) return;
-    const rect = drawCanvas.getBoundingClientRect();
+    const canvas = e.currentTarget;
+    const rect = canvas.getBoundingClientRect();
     const point = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     currentPath.points.push(point);
 
-    // Draw live
-    if (drawCtx && currentPath.points.length > 1) {
+    // Draw live on the correct canvas
+    const entry = drawCanvases.find(dc => dc.canvas === canvas);
+    if (entry && currentPath.points.length > 1) {
       const pts = currentPath.points;
-      drawCtx.beginPath();
-      drawCtx.moveTo(pts[pts.length - 2].x, pts[pts.length - 2].y);
-      drawCtx.lineTo(point.x, point.y);
-      drawCtx.stroke();
+      entry.ctx.beginPath();
+      entry.ctx.moveTo(pts[pts.length - 2].x, pts[pts.length - 2].y);
+      entry.ctx.lineTo(point.x, point.y);
+      entry.ctx.stroke();
     }
   }
 
@@ -306,24 +322,21 @@ const PDFAnnotate = (() => {
     currentPath = null;
   }
 
-  function renderDrawPaths() {
-    if (!drawCtx || !drawCanvas) return;
-    const doc = PDFViewer.getActiveDoc();
-    if (!doc) return;
+  function renderDrawPathsForPage(pageNum, ctx, canvas) {
+    if (!ctx || !canvas) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-
-    const pagePaths = drawPaths.filter(p => p.pageNum === doc.currentPage);
+    const pagePaths = drawPaths.filter(p => p.pageNum === pageNum);
     for (const path of pagePaths) {
-      drawCtx.strokeStyle = path.color;
-      drawCtx.lineWidth = path.width;
-      drawCtx.beginPath();
+      ctx.strokeStyle = path.color;
+      ctx.lineWidth = path.width;
+      ctx.beginPath();
       if (path.points.length > 0) {
-        drawCtx.moveTo(path.points[0].x, path.points[0].y);
+        ctx.moveTo(path.points[0].x, path.points[0].y);
         for (let i = 1; i < path.points.length; i++) {
-          drawCtx.lineTo(path.points[i].x, path.points[i].y);
+          ctx.lineTo(path.points[i].x, path.points[i].y);
         }
-        drawCtx.stroke();
+        ctx.stroke();
       }
     }
   }

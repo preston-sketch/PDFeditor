@@ -1,5 +1,6 @@
 /**
  * PDF Viewer - PDF.js rendering, navigation, zoom, thumbnails, multi-file tabs
+ * Renders all pages in a continuous scrollable view.
  */
 
 const PDFViewer = (() => {
@@ -11,7 +12,7 @@ const PDFViewer = (() => {
   // State
   const openDocs = []; // { id, name, pdfDoc, pdfBytes, pageCount, currentPage, zoom, thumbnails[] }
   let activeDocIndex = -1;
-  let renderTask = null;
+  let scrollTracking = true; // pause scroll tracking during programmatic scrolls
 
   // Elements
   const canvasTabs = document.getElementById('canvas-tabs');
@@ -53,7 +54,7 @@ const PDFViewer = (() => {
       activeDocIndex = openDocs.length - 1;
 
       createTab(doc);
-      await renderCurrentPage();
+      await renderAllPages();
       await generateThumbnails(doc);
       updateUI();
 
@@ -96,7 +97,6 @@ const PDFViewer = (() => {
       <span class="canvas-tab-close" title="Close">✕</span>
     `;
 
-    // Deactivate other tabs
     canvasTabs.querySelectorAll('.canvas-tab').forEach(t => t.classList.remove('active'));
 
     tab.addEventListener('click', (e) => {
@@ -119,7 +119,7 @@ const PDFViewer = (() => {
       t.classList.toggle('active', parseInt(t.dataset.docId) === docId);
     });
 
-    renderCurrentPage();
+    renderAllPages();
     renderThumbnails();
     updateUI();
   }
@@ -155,75 +155,113 @@ const PDFViewer = (() => {
     }
   }
 
-  // ---- Rendering ----
+  // ---- Rendering (all pages) ----
 
-  async function renderCurrentPage() {
+  async function renderAllPages() {
     const doc = getActiveDoc();
     if (!doc) return;
 
     showRenderArea();
+    renderArea.innerHTML = '';
 
-    try {
-      const page = await doc.pdfDoc.getPage(doc.currentPage);
-      const scale = doc.zoom;
-      const vp = page.getViewport({ scale });
+    const scale = doc.zoom;
+    const dpr = window.devicePixelRatio || 1;
 
-      renderArea.innerHTML = '';
-      const wrapper = document.createElement('div');
-      wrapper.className = 'pdf-page-wrapper';
-      wrapper.style.width = vp.width + 'px';
-      wrapper.style.height = vp.height + 'px';
+    for (let i = 1; i <= doc.pageCount; i++) {
+      try {
+        const page = await doc.pdfDoc.getPage(i);
+        const vp = page.getViewport({ scale });
 
-      const canvas = document.createElement('canvas');
-      canvas.className = 'pdf-page-canvas';
-      canvas.width = vp.width * (window.devicePixelRatio || 1);
-      canvas.height = vp.height * (window.devicePixelRatio || 1);
-      canvas.style.width = vp.width + 'px';
-      canvas.style.height = vp.height + 'px';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pdf-page-wrapper';
+        wrapper.dataset.page = i;
+        wrapper.style.width = vp.width + 'px';
+        wrapper.style.height = vp.height + 'px';
 
-      const ctx = canvas.getContext('2d');
-      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+        const canvas = document.createElement('canvas');
+        canvas.className = 'pdf-page-canvas';
+        canvas.width = vp.width * dpr;
+        canvas.height = vp.height * dpr;
+        canvas.style.width = vp.width + 'px';
+        canvas.style.height = vp.height + 'px';
 
-      wrapper.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
 
-      // Annotation overlay (below text edit)
-      const annotOverlay = document.createElement('div');
-      annotOverlay.className = 'annotation-overlay';
-      annotOverlay.id = 'annotation-overlay';
-      wrapper.appendChild(annotOverlay);
+        wrapper.appendChild(canvas);
 
-      // Redact overlay
-      const redactOverlay = document.createElement('div');
-      redactOverlay.className = 'redact-overlay';
-      redactOverlay.id = 'redact-overlay';
-      wrapper.appendChild(redactOverlay);
+        // Annotation overlay
+        const annotOverlay = document.createElement('div');
+        annotOverlay.className = 'annotation-overlay';
+        annotOverlay.dataset.page = i;
+        wrapper.appendChild(annotOverlay);
 
-      // Text edit overlay
-      const overlay = document.createElement('div');
-      overlay.className = 'text-edit-overlay';
-      overlay.id = 'text-edit-overlay';
-      wrapper.appendChild(overlay);
+        // Redact overlay
+        const redactOverlay = document.createElement('div');
+        redactOverlay.className = 'redact-overlay';
+        redactOverlay.dataset.page = i;
+        wrapper.appendChild(redactOverlay);
 
-      renderArea.appendChild(wrapper);
+        // Text edit overlay
+        const textOverlay = document.createElement('div');
+        textOverlay.className = 'text-edit-overlay';
+        textOverlay.dataset.page = i;
+        wrapper.appendChild(textOverlay);
 
-      if (renderTask) {
-        try { renderTask.cancel(); } catch (e) {}
-      }
+        renderArea.appendChild(wrapper);
 
-      renderTask = page.render({ canvasContext: ctx, viewport: vp });
-      await renderTask.promise;
-      renderTask = null;
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
 
-      // Notify editor about page render
-      if (typeof PDFEditor !== 'undefined' && PDFEditor.onPageRendered) {
-        PDFEditor.onPageRendered(wrapper, doc.currentPage);
-      }
-
-    } catch (err) {
-      if (err.name !== 'RenderingCancelled') {
-        console.error('Render error:', err);
+        // Notify editor about this page
+        if (typeof PDFEditor !== 'undefined' && PDFEditor.onPageRendered) {
+          PDFEditor.onPageRendered(wrapper, i);
+        }
+      } catch (err) {
+        if (err.name !== 'RenderingCancelled') {
+          console.error('Render error page ' + i + ':', err);
+        }
       }
     }
+  }
+
+  // Keep backward compat — old code calls renderCurrentPage, now renders all
+  async function renderCurrentPage() {
+    return renderAllPages();
+  }
+
+  // ---- Scroll-based page tracking ----
+
+  function initScrollTracking() {
+    viewport.addEventListener('scroll', () => {
+      if (!scrollTracking) return;
+      const doc = getActiveDoc();
+      if (!doc) return;
+
+      const wrappers = renderArea.querySelectorAll('.pdf-page-wrapper');
+      if (wrappers.length === 0) return;
+
+      const viewportRect = viewport.getBoundingClientRect();
+      const viewportMid = viewportRect.top + viewportRect.height / 2;
+
+      let closestPage = 1;
+      let closestDist = Infinity;
+
+      wrappers.forEach(w => {
+        const r = w.getBoundingClientRect();
+        const mid = r.top + r.height / 2;
+        const dist = Math.abs(mid - viewportMid);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestPage = parseInt(w.dataset.page);
+        }
+      });
+
+      if (closestPage !== doc.currentPage) {
+        doc.currentPage = closestPage;
+        updateUI();
+        renderThumbnails();
+      }
+    });
   }
 
   // ---- Thumbnails ----
@@ -247,7 +285,6 @@ const PDFViewer = (() => {
         await page.render({ canvasContext: ctx, viewport: scaledVp }).promise;
         doc.thumbnails.push(canvas);
       } catch (e) {
-        // placeholder
         const canvas = document.createElement('canvas');
         canvas.width = thumbWidth;
         canvas.height = 140;
@@ -292,10 +329,8 @@ const PDFViewer = (() => {
       thumb.appendChild(thumbCanvas);
       thumb.appendChild(label);
 
-      // Click to navigate
       thumb.addEventListener('click', (e) => {
         if (e.ctrlKey || e.metaKey) {
-          // Multi-select
           if (doc.selectedPages.has(pageNum)) {
             doc.selectedPages.delete(pageNum);
           } else {
@@ -309,7 +344,6 @@ const PDFViewer = (() => {
         }
       });
 
-      // Right-click context menu
       thumb.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         if (!doc.selectedPages.has(pageNum)) {
@@ -320,7 +354,6 @@ const PDFViewer = (() => {
         UI.showContextMenu('page-context-menu', e.clientX, e.clientY);
       });
 
-      // Drag for reorder
       thumb.draggable = true;
       thumb.addEventListener('dragstart', (e) => {
         e.dataTransfer.setData('text/plain', pageNum.toString());
@@ -365,14 +398,22 @@ const PDFViewer = (() => {
     }
   }
 
-  // ---- Navigation ----
+  // ---- Navigation (scroll-to-page) ----
 
   function goToPage(pageNum) {
     const doc = getActiveDoc();
     if (!doc) return;
     pageNum = Math.max(1, Math.min(doc.pageCount, pageNum));
     doc.currentPage = pageNum;
-    renderCurrentPage();
+
+    // Scroll to the page wrapper
+    const wrapper = renderArea.querySelector(`.pdf-page-wrapper[data-page="${pageNum}"]`);
+    if (wrapper) {
+      scrollTracking = false;
+      wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => { scrollTracking = true; }, 500);
+    }
+
     renderThumbnails();
     updateUI();
   }
@@ -403,20 +444,20 @@ const PDFViewer = (() => {
     if (!doc) return;
 
     if (zoom === 'fit') {
-      const viewportEl = document.getElementById('canvas-viewport');
       doc.pdfDoc.getPage(doc.currentPage).then(page => {
         const vp = page.getViewport({ scale: 1 });
-        const scaleX = (viewportEl.clientWidth - 40) / vp.width;
-        const scaleY = (viewportEl.clientHeight - 40) / vp.height;
+        const scaleX = (viewport.clientWidth - 40) / vp.width;
+        const scaleY = (viewport.clientHeight - 40) / vp.height;
         doc.zoom = Math.min(scaleX, scaleY);
-        renderCurrentPage();
+        renderAllPages().then(() => goToPage(doc.currentPage));
         updateUI();
       });
       return;
     }
 
     doc.zoom = parseFloat(zoom);
-    renderCurrentPage();
+    const currentPage = doc.currentPage;
+    renderAllPages().then(() => goToPage(currentPage));
     updateUI();
   }
 
@@ -424,7 +465,8 @@ const PDFViewer = (() => {
     const doc = getActiveDoc();
     if (!doc) return;
     doc.zoom = Math.min(4, doc.zoom + 0.25);
-    renderCurrentPage();
+    const currentPage = doc.currentPage;
+    renderAllPages().then(() => goToPage(currentPage));
     updateUI();
   }
 
@@ -432,7 +474,8 @@ const PDFViewer = (() => {
     const doc = getActiveDoc();
     if (!doc) return;
     doc.zoom = Math.max(0.25, doc.zoom - 0.25);
-    renderCurrentPage();
+    const currentPage = doc.currentPage;
+    renderAllPages().then(() => goToPage(currentPage));
     updateUI();
   }
 
@@ -458,7 +501,6 @@ const PDFViewer = (() => {
       UI.setPageStatus(doc.currentPage, doc.pageCount);
       UI.setZoomStatus(doc.zoom);
 
-      // Update zoom select
       const zoomVal = doc.zoom.toString();
       const opt = navZoom.querySelector(`option[value="${zoomVal}"]`);
       if (opt) {
@@ -467,7 +509,6 @@ const PDFViewer = (() => {
         navZoom.value = '';
       }
 
-      // Update title
       document.getElementById('titlebar-text').textContent = `${doc.name} - PDFeditor 98`;
     } else {
       navPage.value = '';
@@ -498,6 +539,18 @@ const PDFViewer = (() => {
     navZoom.addEventListener('change', () => {
       setZoom(navZoom.value);
     });
+
+    initScrollTracking();
+  }
+
+  // ---- Overlay Helpers (for other modules) ----
+
+  function getOverlaysForType(type) {
+    return renderArea.querySelectorAll(`.${type}[data-page]`);
+  }
+
+  function getOverlayForPage(type, pageNum) {
+    return renderArea.querySelector(`.${type}[data-page="${pageNum}"]`);
   }
 
   // ---- Getters ----
@@ -532,9 +585,12 @@ const PDFViewer = (() => {
     doc.currentPage = Math.min(currentPage, doc.pageCount);
     doc.selectedPages.clear();
 
-    await renderCurrentPage();
+    await renderAllPages();
     await generateThumbnails(doc);
     updateUI();
+
+    // Scroll back to the page we were on
+    goToPage(doc.currentPage);
   }
 
   // ---- Helpers ----
@@ -566,8 +622,11 @@ const PDFViewer = (() => {
     closeDocument,
     refreshDocument,
     renderCurrentPage,
+    renderAllPages,
     renderThumbnails,
     generateThumbnails,
     updateUI,
+    getOverlaysForType,
+    getOverlayForPage,
   };
 })();
