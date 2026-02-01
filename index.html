@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDFeditor 98</title>
+  <link rel="stylesheet" href="css/win98.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>📄</text></svg>">
+</head>
+<body>
+  <div class="app-window win98-window" id="app">
+    <!-- Title Bar -->
+    <div class="win98-titlebar" id="titlebar">
+      <span class="win98-titlebar-icon">📄</span>
+      <span class="win98-titlebar-title" id="titlebar-text">PDFeditor 98</span>
+      <div class="win98-titlebar-buttons">
+        <button class="win98-titlebar-btn" id="btn-minimize" title="Minimize"><span>_</span></button>
+        <button class="win98-titlebar-btn" id="btn-maximize" title="Maximize"><span>□</span></button>
+        <button class="win98-titlebar-btn" id="btn-close" title="Close"><span>✕</span></button>
+      </div>
+    </div>
+
+    <!-- Menu Bar -->
+    <div class="win98-menubar" id="menubar">
+      <div class="win98-menu-item" data-menu="file"><span class="underline">F</span>ile</div>
+      <div class="win98-menu-item" data-menu="edit"><span class="underline">E</span>dit</div>
+      <div class="win98-menu-item" data-menu="tools"><span class="underline">T</span>ools</div>
+      <div class="win98-menu-item" data-menu="view"><span class="underline">V</span>iew</div>
+      <div class="win98-menu-item" data-menu="help"><span class="underline">H</span>elp</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="app-toolbar" id="toolbar">
+      <div class="toolbar-group">
+        <button class="win98-toolbar-btn has-label" id="tb-open" title="Open PDF (Ctrl+O)">
+          <span class="btn-icon">📂</span><span class="btn-label">Open</span>
+        </button>
+        <button class="win98-toolbar-btn has-label" id="tb-save" title="Save (Ctrl+S)" disabled>
+          <span class="btn-icon">💾</span><span class="btn-label">Save</span>
+        </button>
+        <button class="win98-toolbar-btn" id="tb-print" title="Print (Ctrl+P)" disabled>
+          <span class="btn-icon">🖨️</span>
+        </button>
+      </div>
+      <div class="win98-toolbar-sep"></div>
+      <div class="toolbar-group">
+        <button class="win98-toolbar-btn has-label" id="tb-merge" title="Merge PDFs" disabled>
+          <span class="btn-icon">📎</span><span class="btn-label">Merge</span>
+        </button>
+        <button class="win98-toolbar-btn has-label" id="tb-extract" title="Extract Pages" disabled>
+          <span class="btn-icon">✂️</span><span class="btn-label">Extract</span>
+        </button>
+        <button class="win98-toolbar-btn has-label" id="tb-toword" title="Convert to Word" disabled>
+          <span class="btn-icon">📝</span><span class="btn-label">To Word</span>
+        </button>
+      </div>
+      <div class="win98-toolbar-sep"></div>
+      <div class="toolbar-group">
+        <button class="win98-toolbar-btn" id="tb-undo" title="Undo (Ctrl+Z)" disabled>
+          <span class="btn-icon">↩️</span>
+        </button>
+        <button class="win98-toolbar-btn" id="tb-redo" title="Redo (Ctrl+Y)" disabled>
+          <span class="btn-icon">↪️</span>
+        </button>
+      </div>
+      <div class="win98-toolbar-sep"></div>
+      <div class="toolbar-group">
+        <button class="win98-toolbar-btn" id="tb-zoomin" title="Zoom In (Ctrl++)" disabled>
+          <span class="btn-icon">🔍+</span>
+        </button>
+        <button class="win98-toolbar-btn" id="tb-zoomout" title="Zoom Out (Ctrl+-)" disabled>
+          <span class="btn-icon">🔍-</span>
+        </button>
+        <button class="win98-toolbar-btn" id="tb-fitpage" title="Fit Page" disabled>
+          <span class="btn-icon">⬜</span>
+        </button>
+      </div>
+      <div class="win98-toolbar-sep"></div>
+      <div class="toolbar-group">
+        <button class="win98-toolbar-btn" id="tb-editmode" title="Text Edit Mode" disabled>
+          <span class="btn-icon">✏️</span>
+        </button>
+      </div>
+      <div class="win98-toolbar-sep"></div>
+      <div class="toolbar-group">
+        <button class="win98-toolbar-btn has-label" id="tb-gdrive" title="Google Drive">
+          <span class="btn-icon">☁️</span><span class="btn-label">GDrive</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Edit Mode Banner -->
+    <div class="edit-mode-banner" id="edit-mode-banner">
+      ✏️ Text Edit Mode — Click on the page to add text. Press Escape to exit.
+    </div>
+
+    <!-- Main Content -->
+    <div class="app-content">
+      <!-- Left Sidebar -->
+      <div class="app-sidebar" id="sidebar">
+        <div class="sidebar-section" id="tools-section">
+          <div class="win98-section-header" data-section="tools">
+            <span>🔧 Tools</span>
+            <span class="collapse-icon">▾</span>
+          </div>
+          <div class="sidebar-tools-body">
+            <button class="win98-button sidebar-tool-btn" id="side-merge" disabled>📎 Merge PDFs</button>
+            <button class="win98-button sidebar-tool-btn" id="side-extract" disabled>✂️ Extract Pages</button>
+            <button class="win98-button sidebar-tool-btn" id="side-edit" disabled>✏️ Text Edit</button>
+            <button class="win98-button sidebar-tool-btn" id="side-toword" disabled>📝 To Word</button>
+            <button class="win98-button sidebar-tool-btn" id="side-print" disabled>🖨️ Print</button>
+            <button class="win98-button sidebar-tool-btn" id="side-save" disabled>💾 Save</button>
+          </div>
+        </div>
+        <div class="sidebar-section" id="holding-cell-section">
+          <div class="win98-section-header" data-section="holding-cell">
+            <span>☁️ Holding Cell</span>
+            <span class="collapse-icon">▾</span>
+          </div>
+          <div class="sidebar-section-body" id="holding-cell-list">
+            <div class="empty-panel-msg">Sign in to Google Drive to use the holding cell.</div>
+          </div>
+        </div>
+        <div class="sidebar-section" id="recent-files-section" style="flex:1;">
+          <div class="win98-section-header" data-section="recent-files">
+            <span>📋 Recent Files</span>
+            <span class="collapse-icon">▾</span>
+          </div>
+          <div class="sidebar-section-body" id="recent-files-list">
+            <div class="empty-panel-msg">No recent files.</div>
+          </div>
+        </div>
+        <div class="sidebar-upload-area">
+          <button class="win98-button sidebar-upload-btn" id="btn-browse">Browse...</button>
+        </div>
+      </div>
+
+      <!-- Left Resize Handle -->
+      <div class="resize-handle" id="resize-left" data-target="sidebar"></div>
+
+      <!-- Main Canvas -->
+      <div class="app-canvas" id="canvas">
+        <!-- Tabs -->
+        <div class="canvas-tabs" id="canvas-tabs">
+          <!-- Tabs inserted dynamically -->
+        </div>
+
+        <!-- Viewport -->
+        <div class="canvas-viewport" id="canvas-viewport">
+          <!-- Drop Zone (shown when no file loaded) -->
+          <div class="drop-zone" id="drop-zone">
+            <div class="drop-zone-inner">
+              <div class="drop-zone-icon">📁</div>
+              <div class="drop-zone-text">Drop PDF files here<br>or click to browse</div>
+            </div>
+          </div>
+
+          <!-- PDF Render Area (shown when file loaded) -->
+          <div class="pdf-render-area" id="pdf-render-area">
+            <!-- Pages rendered here dynamically -->
+          </div>
+        </div>
+
+        <!-- Page Nav -->
+        <div class="canvas-nav" id="canvas-nav">
+          <button class="win98-button" id="nav-first" style="min-width:30px;">|◀</button>
+          <button class="win98-button" id="nav-prev" style="min-width:30px;">◀</button>
+          <span>Page</span>
+          <input type="text" class="win98-input page-input" id="nav-page" value="1">
+          <span>of <span id="nav-total">0</span></span>
+          <button class="win98-button" id="nav-next" style="min-width:30px;">▶</button>
+          <button class="win98-button" id="nav-last" style="min-width:30px;">▶|</button>
+          <div class="win98-toolbar-sep" style="height:18px;"></div>
+          <span>Zoom:</span>
+          <select class="win98-input" id="nav-zoom" style="width:70px;">
+            <option value="0.5">50%</option>
+            <option value="0.75">75%</option>
+            <option value="1" selected>100%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+            <option value="2">200%</option>
+            <option value="fit">Fit</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right Resize Handle -->
+      <div class="resize-handle-right" id="resize-right" data-target="page-panel"></div>
+
+      <!-- Right Panel - Page Thumbnails -->
+      <div class="app-page-panel" id="page-panel">
+        <div class="page-panel-header">Pages</div>
+        <div class="page-thumbnails" id="page-thumbnails">
+          <div class="empty-panel-msg">No pages to display.</div>
+        </div>
+        <div class="selection-info-bar" id="selection-info">
+          <span id="selection-count">0</span> pages selected
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="win98-statusbar" id="statusbar">
+      <div class="win98-statusbar-section" id="status-message">Ready.</div>
+      <div class="win98-statusbar-section" id="status-page" style="width:100px;text-align:center;">—</div>
+      <div class="win98-statusbar-section" id="status-zoom" style="width:60px;text-align:center;">100%</div>
+      <div class="win98-statusbar-grip"></div>
+    </div>
+  </div>
+
+  <!-- Hidden file input -->
+  <input type="file" id="file-input" accept=".pdf" multiple style="display:none;">
+
+  <!-- Menu Definitions (dropdown menus) -->
+  <div class="win98-dropdown" id="menu-file">
+    <div class="win98-dropdown-item" data-action="open">Open...<span class="win98-dropdown-shortcut">Ctrl+O</span></div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="save-drive">Save to Drive<span class="win98-dropdown-shortcut">Ctrl+S</span></div>
+    <div class="win98-dropdown-item" data-action="save-local">Save Local Copy<span class="win98-dropdown-shortcut">Ctrl+Shift+S</span></div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="print">Print...<span class="win98-dropdown-shortcut">Ctrl+P</span></div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="recent-files">Recent Files ▸</div>
+  </div>
+  <div class="win98-dropdown" id="menu-edit">
+    <div class="win98-dropdown-item" data-action="undo">Undo<span class="win98-dropdown-shortcut">Ctrl+Z</span></div>
+    <div class="win98-dropdown-item" data-action="redo">Redo<span class="win98-dropdown-shortcut">Ctrl+Y</span></div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="select-all">Select All Pages<span class="win98-dropdown-shortcut">Ctrl+A</span></div>
+    <div class="win98-dropdown-item" data-action="delete-page">Delete Selected Pages<span class="win98-dropdown-shortcut">Del</span></div>
+  </div>
+  <div class="win98-dropdown" id="menu-tools">
+    <div class="win98-dropdown-item" data-action="merge">Merge PDFs...</div>
+    <div class="win98-dropdown-item" data-action="extract">Extract Pages...</div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="to-word">Convert to Word...</div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="edit-mode">Text Edit Mode<span class="win98-dropdown-shortcut">Ctrl+E</span></div>
+  </div>
+  <div class="win98-dropdown" id="menu-view">
+    <div class="win98-dropdown-item" data-action="zoom-in">Zoom In<span class="win98-dropdown-shortcut">Ctrl++</span></div>
+    <div class="win98-dropdown-item" data-action="zoom-out">Zoom Out<span class="win98-dropdown-shortcut">Ctrl+-</span></div>
+    <div class="win98-dropdown-item" data-action="fit-page">Fit Page<span class="win98-dropdown-shortcut">Ctrl+0</span></div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="toggle-sidebar">Toggle Sidebar</div>
+    <div class="win98-dropdown-item" data-action="toggle-thumbnails">Toggle Thumbnails</div>
+  </div>
+  <div class="win98-dropdown" id="menu-help">
+    <div class="win98-dropdown-item" data-action="shortcuts">Keyboard Shortcuts...</div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="about">About PDFeditor 98...</div>
+  </div>
+
+  <!-- Context Menu for Page Thumbnails -->
+  <div class="win98-context-menu" id="page-context-menu" style="display:none;">
+    <div class="win98-dropdown-item" data-action="ctx-extract">Extract Selected Pages</div>
+    <div class="win98-dropdown-item" data-action="ctx-delete">Delete Selected Pages</div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="ctx-move-up">Move Up</div>
+    <div class="win98-dropdown-item" data-action="ctx-move-down">Move Down</div>
+  </div>
+
+  <!-- Context Menu for Sidebar Files -->
+  <div class="win98-context-menu" id="file-context-menu" style="display:none;">
+    <div class="win98-dropdown-item" data-action="ctx-open-file">Open</div>
+    <div class="win98-dropdown-item" data-action="ctx-download">Download</div>
+    <div class="win98-dropdown-separator"></div>
+    <div class="win98-dropdown-item" data-action="ctx-rename">Rename...</div>
+    <div class="win98-dropdown-item" data-action="ctx-delete-file">Delete</div>
+  </div>
+
+  <!-- Libraries (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/ui.js"></script>
+  <script src="js/file-manager.js"></script>
+  <script src="js/pdf-viewer.js"></script>
+  <script src="js/pdf-editor.js"></script>
+  <script src="js/pdf-merge.js"></script>
+  <script src="js/pdf-convert.js"></script>
+  <script src="js/drive.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

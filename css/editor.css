@@ -1,0 +1,242 @@
+/* PDF Editor Specific Styles */
+
+/* Text Edit Overlay */
+.text-edit-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.text-edit-overlay.active {
+  pointer-events: auto;
+  cursor: text;
+}
+
+.text-edit-box {
+  position: absolute;
+  border: 1px dashed var(--win98-highlight);
+  background: rgba(255, 255, 255, 0.8);
+  padding: 2px 4px;
+  font-family: var(--win98-font);
+  cursor: move;
+  min-width: 20px;
+  min-height: 16px;
+}
+
+.text-edit-box:focus {
+  border: 1px solid var(--win98-highlight);
+  background: rgba(255, 255, 255, 0.95);
+  outline: none;
+}
+
+.text-edit-box.selected {
+  border: 2px solid var(--win98-highlight);
+  box-shadow: 0 0 0 1px rgba(0, 0, 128, 0.3);
+}
+
+.text-edit-handle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--win98-highlight);
+  border: 1px solid var(--win98-white);
+}
+
+.text-edit-handle.nw { top: -3px; left: -3px; cursor: nw-resize; }
+.text-edit-handle.ne { top: -3px; right: -3px; cursor: ne-resize; }
+.text-edit-handle.sw { bottom: -3px; left: -3px; cursor: sw-resize; }
+.text-edit-handle.se { bottom: -3px; right: -3px; cursor: se-resize; }
+
+/* Edit Mode Indicator */
+.edit-mode-banner {
+  display: none;
+  background: #FFFFE1;
+  border: 1px solid #808080;
+  padding: 2px 8px;
+  font-size: 11px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.edit-mode-banner.visible {
+  display: block;
+}
+
+/* Annotation Layer */
+.annotation-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* Text Properties Panel */
+.text-props-panel {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  padding: 8px;
+  z-index: 20;
+  display: none;
+  min-width: 180px;
+}
+
+.text-props-panel.visible {
+  display: block;
+}
+
+.text-props-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.text-props-label {
+  font-size: 11px;
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.text-props-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Merge Dialog */
+.merge-file-list {
+  background: var(--win98-white);
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  min-height: 120px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 8px 0;
+}
+
+.merge-file-item {
+  padding: 3px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--win98-light-grey);
+}
+
+.merge-file-item:hover {
+  background: var(--win98-highlight);
+  color: var(--win98-highlight-text);
+}
+
+.merge-file-item.selected {
+  background: var(--win98-highlight);
+  color: var(--win98-highlight-text);
+}
+
+.merge-file-item .file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.merge-file-item .file-pages {
+  color: var(--win98-button-shadow);
+  font-size: 10px;
+}
+
+.merge-order-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+}
+
+.merge-order-controls .win98-button {
+  min-width: 30px;
+  padding: 2px;
+}
+
+/* Extract Pages Dialog */
+.extract-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 4px;
+  padding: 8px;
+  background: var(--win98-white);
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  max-height: 250px;
+  overflow-y: auto;
+  margin: 8px 0;
+}
+
+.extract-page-item {
+  border: 2px solid transparent;
+  padding: 2px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 10px;
+}
+
+.extract-page-item:hover {
+  background: var(--win98-light-grey);
+}
+
+.extract-page-item.selected {
+  border-color: var(--win98-highlight);
+  background: #D0D0E0;
+}
+
+.extract-page-item canvas {
+  width: 100%;
+  display: block;
+}
+
+/* Conversion Progress */
+.conversion-progress {
+  padding: 16px;
+  text-align: center;
+}
+
+.conversion-status {
+  margin-bottom: 8px;
+  font-size: 11px;
+}
+
+/* Page Drag Ghost */
+.page-drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  opacity: 0.7;
+  transform: rotate(3deg);
+}
+
+.page-drag-ghost canvas {
+  width: 80px;
+  height: auto;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Multi-select info bar */
+.selection-info-bar {
+  display: none;
+  background: #FFFFE1;
+  border-top: 1px solid var(--win98-button-shadow);
+  padding: 2px 8px;
+  font-size: 11px;
+  text-align: center;
+}
+
+.selection-info-bar.visible {
+  display: block;
+}

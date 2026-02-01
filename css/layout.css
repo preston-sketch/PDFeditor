@@ -1,0 +1,456 @@
+/* App Layout */
+
+.app-window {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Toolbar */
+.app-toolbar {
+  background: var(--win98-bg);
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  gap: 1px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--win98-button-shadow);
+  flex-shrink: 0;
+  min-height: 28px;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.win98-toolbar-btn .btn-label {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .win98-toolbar-btn.has-label {
+    width: auto;
+    padding: 2px 6px;
+    gap: 3px;
+  }
+  .win98-toolbar-btn.has-label .btn-label {
+    display: inline;
+    font-size: 11px;
+  }
+}
+
+/* Main Content Area */
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Left Sidebar */
+.app-sidebar {
+  width: 200px;
+  min-width: 120px;
+  max-width: 400px;
+  background: var(--win98-bg);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--win98-button-shadow);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.app-sidebar.collapsed {
+  width: 0;
+  min-width: 0;
+  border-right: none;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Sidebar Tools */
+.sidebar-tools-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px;
+}
+
+.sidebar-tool-btn {
+  width: 100%;
+  min-width: unset;
+  text-align: left;
+  padding: 4px 8px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sidebar-section.collapsed .sidebar-tools-body {
+  display: none;
+}
+
+.sidebar-section.collapsed .sidebar-section-body {
+  display: none;
+}
+
+.sidebar-section-body {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--win98-white);
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-dark-shadow);
+  margin: 0 4px 4px;
+  min-height: 60px;
+}
+
+.sidebar-file-item {
+  padding: 2px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-file-item:hover {
+  background: var(--win98-highlight);
+  color: var(--win98-highlight-text);
+}
+
+.sidebar-file-item.selected {
+  background: var(--win98-highlight);
+  color: var(--win98-highlight-text);
+}
+
+.sidebar-file-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 13px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.sidebar-upload-area {
+  padding: 4px;
+}
+
+.sidebar-upload-btn {
+  width: 100%;
+  min-width: unset;
+}
+
+/* Resize Handles */
+.resize-handle {
+  width: 4px;
+  cursor: col-resize;
+  background: var(--win98-bg);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.resize-handle:hover {
+  background: var(--win98-light-grey);
+}
+
+.resize-handle-right {
+  width: 4px;
+  cursor: col-resize;
+  background: var(--win98-bg);
+  flex-shrink: 0;
+}
+
+.resize-handle-right:hover {
+  background: var(--win98-light-grey);
+}
+
+/* Main Canvas */
+.app-canvas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: #808080;
+}
+
+/* Tab Bar */
+.canvas-tabs {
+  display: flex;
+  background: var(--win98-bg);
+  border-bottom: 2px solid var(--win98-button-highlight);
+  padding: 2px 4px 0;
+  gap: 1px;
+  flex-shrink: 0;
+  min-height: 24px;
+  overflow-x: auto;
+}
+
+.canvas-tab {
+  padding: 2px 8px;
+  background: var(--win98-bg);
+  border: 1px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-shadow) transparent var(--win98-button-highlight);
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 200px;
+  position: relative;
+  top: 1px;
+}
+
+.canvas-tab.active {
+  background: var(--win98-bg);
+  border-bottom-color: var(--win98-bg);
+  top: 0;
+  padding-bottom: 3px;
+  z-index: 1;
+}
+
+.canvas-tab-close {
+  width: 12px;
+  height: 12px;
+  font-size: 9px;
+  line-height: 12px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.canvas-tab-close:hover {
+  background: var(--win98-button-shadow);
+  color: var(--win98-white);
+}
+
+.canvas-tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Canvas Viewport */
+.canvas-viewport {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Drop Zone */
+.drop-zone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #808080;
+}
+
+.drop-zone-inner {
+  width: 300px;
+  height: 200px;
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-dark-shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.drop-zone-icon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.drop-zone-text {
+  font-size: 12px;
+  color: var(--win98-text);
+}
+
+.drop-zone.drag-over .drop-zone-inner {
+  border-color: var(--win98-highlight);
+  background: #D0D0E0;
+}
+
+.drop-zone-hidden {
+  display: none;
+}
+
+/* PDF Render Area */
+.pdf-render-area {
+  display: none;
+  padding: 20px;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.pdf-render-area.visible {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pdf-page-wrapper {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: white;
+  position: relative;
+}
+
+.pdf-page-canvas {
+  display: block;
+}
+
+/* Navigation Bar */
+.canvas-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px;
+  background: var(--win98-bg);
+  border-top: 1px solid var(--win98-button-highlight);
+  flex-shrink: 0;
+  display: none;
+}
+
+.canvas-nav.visible {
+  display: flex;
+}
+
+.canvas-nav .page-input {
+  width: 50px;
+  text-align: center;
+}
+
+/* Right Panel - Page Thumbnails */
+.app-page-panel {
+  width: 120px;
+  min-width: 80px;
+  max-width: 250px;
+  background: var(--win98-bg);
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--win98-button-highlight);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.app-page-panel.collapsed {
+  width: 0;
+  min-width: 0;
+  border-left: none;
+}
+
+.page-panel-header {
+  padding: 3px 6px;
+  font-weight: bold;
+  font-size: 11px;
+  background: var(--win98-bg);
+  border-bottom: 1px solid var(--win98-button-shadow);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.page-thumbnails {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--win98-white);
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-dark-shadow);
+  margin: 0 4px 4px;
+}
+
+.page-thumbnail {
+  width: 90%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  position: relative;
+}
+
+.page-thumbnail:hover {
+  background: var(--win98-light-grey);
+}
+
+.page-thumbnail.selected {
+  border-color: var(--win98-highlight);
+  background: #D0D0E0;
+}
+
+.page-thumbnail.active {
+  border-color: var(--win98-highlight);
+}
+
+.page-thumbnail.drag-over {
+  border-top: 3px solid var(--win98-highlight);
+}
+
+.page-thumbnail canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.page-thumbnail-label {
+  font-size: 10px;
+  color: var(--win98-text);
+  text-align: center;
+}
+
+.page-thumbnail-source {
+  font-size: 9px;
+  color: var(--win98-button-shadow);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Empty state for panels when no PDF loaded */
+.empty-panel-msg {
+  padding: 12px;
+  text-align: center;
+  color: var(--win98-button-shadow);
+  font-size: 11px;
+  font-style: italic;
+}

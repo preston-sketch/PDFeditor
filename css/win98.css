@@ -1,0 +1,607 @@
+/* Windows 98 Theme System */
+
+:root {
+  --win98-bg: #C0C0C0;
+  --win98-title: #000080;
+  --win98-title-inactive: #808080;
+  --win98-title-text: #FFFFFF;
+  --win98-text: #000000;
+  --win98-white: #FFFFFF;
+  --win98-black: #000000;
+  --win98-dark-grey: #808080;
+  --win98-light-grey: #DFDFDF;
+  --win98-highlight: #000080;
+  --win98-highlight-text: #FFFFFF;
+  --win98-button-face: #C0C0C0;
+  --win98-button-highlight: #FFFFFF;
+  --win98-button-shadow: #808080;
+  --win98-button-dark-shadow: #000000;
+  --win98-window-bg: #FFFFFF;
+  --win98-font: "MS Sans Serif", "Tahoma", "Segoe UI", system-ui, sans-serif;
+  --win98-font-size: 11px;
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--win98-font);
+  font-size: var(--win98-font-size);
+  color: var(--win98-text);
+  background: #008080;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 3D Border Mixins via classes */
+.win98-outset {
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset 1px 1px 0 var(--win98-light-grey), inset -1px -1px 0 var(--win98-button-shadow);
+}
+
+.win98-inset {
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-dark-shadow), inset -1px -1px 0 var(--win98-light-grey);
+}
+
+/* Window Frame */
+.win98-window {
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset 1px 1px 0 var(--win98-light-grey), inset -1px -1px 0 var(--win98-button-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Title Bar */
+.win98-titlebar {
+  background: linear-gradient(90deg, var(--win98-title), #1084D0);
+  color: var(--win98-title-text);
+  padding: 2px 3px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: bold;
+  font-size: 11px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.win98-titlebar.inactive {
+  background: linear-gradient(90deg, var(--win98-title-inactive), #B5B5B5);
+}
+
+.win98-titlebar-icon {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+.win98-titlebar-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0;
+}
+
+.win98-titlebar-buttons {
+  display: flex;
+  gap: 2px;
+}
+
+.win98-titlebar-btn {
+  width: 16px;
+  height: 14px;
+  background: var(--win98-bg);
+  border: 1px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset -1px -1px 0 var(--win98-button-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-size: 8px;
+  font-family: "Marlett", sans-serif;
+  line-height: 1;
+}
+
+.win98-titlebar-btn:active {
+  border-color: var(--win98-button-dark-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-dark-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-shadow);
+  padding: 1px 0 0 1px;
+}
+
+.win98-titlebar-btn span {
+  font-family: var(--win98-font);
+  font-weight: bold;
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* Menu Bar */
+.win98-menubar {
+  background: var(--win98-bg);
+  display: flex;
+  padding: 1px 0;
+  border-bottom: 1px solid var(--win98-button-shadow);
+  flex-shrink: 0;
+  height: 20px;
+}
+
+.win98-menu-item {
+  padding: 2px 8px;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  font-size: var(--win98-font-size);
+}
+
+.win98-menu-item:hover,
+.win98-menu-item.active {
+  background: var(--win98-highlight);
+  color: var(--win98-highlight-text);
+}
+
+.win98-menu-item .underline {
+  text-decoration: underline;
+}
+
+/* Dropdown Menu */
+.win98-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset 1px 1px 0 var(--win98-light-grey), inset -1px -1px 0 var(--win98-button-shadow);
+  min-width: 180px;
+  z-index: 1000;
+  padding: 2px;
+  display: none;
+}
+
+.win98-dropdown.show {
+  display: block;
+}
+
+.win98-dropdown-item {
+  padding: 3px 24px 3px 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+}
+
+.win98-dropdown-item:hover {
+  background: var(--win98-highlight);
+  color: var(--win98-highlight-text);
+}
+
+.win98-dropdown-item.disabled {
+  color: var(--win98-button-shadow);
+  text-shadow: 1px 1px 0 var(--win98-button-highlight);
+  cursor: default;
+}
+
+.win98-dropdown-item.disabled:hover {
+  background: transparent;
+  color: var(--win98-button-shadow);
+}
+
+.win98-dropdown-shortcut {
+  margin-left: 24px;
+  color: inherit;
+  font-size: var(--win98-font-size);
+}
+
+.win98-dropdown-separator {
+  height: 1px;
+  margin: 3px 2px;
+  background: var(--win98-button-shadow);
+  border-bottom: 1px solid var(--win98-button-highlight);
+}
+
+.win98-dropdown-item .check-mark {
+  position: absolute;
+  left: 6px;
+}
+
+/* Buttons */
+.win98-button {
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset -1px -1px 0 var(--win98-button-shadow), inset 1px 1px 0 var(--win98-light-grey);
+  padding: 3px 12px;
+  font-family: var(--win98-font);
+  font-size: var(--win98-font-size);
+  cursor: pointer;
+  min-width: 75px;
+  text-align: center;
+  outline: none;
+}
+
+.win98-button:active {
+  border-color: var(--win98-button-dark-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-dark-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-shadow);
+  padding: 4px 11px 2px 13px;
+}
+
+.win98-button:focus-visible {
+  outline: 1px dotted var(--win98-black);
+  outline-offset: -4px;
+}
+
+.win98-button.default {
+  border-width: 3px;
+  border-color: var(--win98-black);
+  box-shadow: inset 2px 2px 0 var(--win98-button-highlight), inset -2px -2px 0 var(--win98-button-shadow);
+}
+
+.win98-button:disabled {
+  color: var(--win98-button-shadow);
+  text-shadow: 1px 1px 0 var(--win98-button-highlight);
+  cursor: default;
+}
+
+/* Toolbar Buttons */
+.win98-toolbar-btn {
+  width: 24px;
+  height: 22px;
+  background: var(--win98-bg);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 2px;
+  position: relative;
+}
+
+.win98-toolbar-btn:hover {
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset -1px -1px 0 var(--win98-button-shadow);
+}
+
+.win98-toolbar-btn:active,
+.win98-toolbar-btn.pressed {
+  border-color: var(--win98-button-dark-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-dark-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-shadow);
+}
+
+.win98-toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.win98-toolbar-btn:disabled:hover {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.win98-toolbar-btn .btn-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 14px;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Toolbar Separator */
+.win98-toolbar-sep {
+  width: 2px;
+  height: 22px;
+  margin: 0 2px;
+  border-left: 1px solid var(--win98-button-shadow);
+  border-right: 1px solid var(--win98-button-highlight);
+}
+
+/* Tooltip */
+.win98-tooltip {
+  position: fixed;
+  background: #FFFFE1;
+  border: 1px solid var(--win98-black);
+  padding: 2px 5px;
+  font-size: 11px;
+  z-index: 10000;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(var(--win98-bg) 0% 25%, var(--win98-white) 0% 50%) 50% / 2px 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset -1px -1px 0 var(--win98-button-shadow);
+}
+
+::-webkit-scrollbar-button {
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset -1px -1px 0 var(--win98-button-shadow);
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--win98-bg);
+}
+
+/* Dialog / Modal */
+.win98-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.win98-dialog {
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset 1px 1px 0 var(--win98-light-grey), inset -1px -1px 0 var(--win98-button-shadow),
+              4px 4px 0 rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.win98-dialog .win98-titlebar {
+  cursor: move;
+}
+
+.win98-dialog-body {
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.win98-dialog-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: 28px;
+  line-height: 32px;
+}
+
+.win98-dialog-text {
+  flex: 1;
+  padding-top: 4px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.win98-dialog-buttons {
+  padding: 8px 16px 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Context Menu */
+.win98-context-menu {
+  position: fixed;
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  box-shadow: inset 1px 1px 0 var(--win98-light-grey), inset -1px -1px 0 var(--win98-button-shadow),
+              2px 2px 0 rgba(0, 0, 0, 0.2);
+  min-width: 160px;
+  z-index: 9000;
+  padding: 2px;
+}
+
+/* Tabs */
+.win98-tab-bar {
+  display: flex;
+  padding: 0 4px;
+  margin-bottom: -2px;
+  position: relative;
+  z-index: 1;
+}
+
+.win98-tab {
+  padding: 3px 10px;
+  background: var(--win98-bg);
+  border: 2px solid;
+  border-color: var(--win98-button-highlight) var(--win98-button-dark-shadow) var(--win98-button-dark-shadow) var(--win98-button-highlight);
+  border-bottom: none;
+  margin-right: 2px;
+  cursor: pointer;
+  font-size: var(--win98-font-size);
+  position: relative;
+  top: 2px;
+}
+
+.win98-tab.active {
+  top: 0;
+  padding-bottom: 5px;
+  background: var(--win98-bg);
+  z-index: 2;
+  border-bottom: 2px solid var(--win98-bg);
+}
+
+/* Progress Bar */
+.win98-progress {
+  height: 16px;
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  background: var(--win98-white);
+}
+
+.win98-progress-bar {
+  height: 100%;
+  background: var(--win98-title);
+  transition: width 0.2s;
+}
+
+/* Text Input */
+.win98-input {
+  background: var(--win98-white);
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-dark-shadow);
+  padding: 2px 4px;
+  font-family: var(--win98-font);
+  font-size: var(--win98-font-size);
+  outline: none;
+}
+
+/* Tree View */
+.win98-tree {
+  background: var(--win98-white);
+  border: 2px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  box-shadow: inset 1px 1px 0 var(--win98-button-dark-shadow);
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.win98-tree-item {
+  padding: 1px 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.win98-tree-item:hover {
+  background: var(--win98-highlight);
+  color: var(--win98-highlight-text);
+}
+
+.win98-tree-item.selected {
+  background: var(--win98-highlight);
+  color: var(--win98-highlight-text);
+}
+
+.win98-tree-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Grip Handle */
+.win98-grip {
+  width: 4px;
+  cursor: col-resize;
+  background: var(--win98-bg);
+  border-left: 1px solid var(--win98-button-shadow);
+  border-right: 1px solid var(--win98-button-highlight);
+}
+
+.win98-grip-h {
+  height: 4px;
+  cursor: row-resize;
+  background: var(--win98-bg);
+  border-top: 1px solid var(--win98-button-shadow);
+  border-bottom: 1px solid var(--win98-button-highlight);
+}
+
+/* Status Bar */
+.win98-statusbar {
+  background: var(--win98-bg);
+  border-top: 1px solid var(--win98-button-shadow);
+  display: flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.win98-statusbar-section {
+  padding: 1px 6px;
+  border: 1px solid;
+  border-color: var(--win98-button-shadow) var(--win98-button-highlight) var(--win98-button-highlight) var(--win98-button-shadow);
+  height: 18px;
+  display: flex;
+  align-items: center;
+  font-size: var(--win98-font-size);
+}
+
+.win98-statusbar-section:first-child {
+  flex: 1;
+}
+
+.win98-statusbar-grip {
+  width: 14px;
+  height: 14px;
+  margin-left: 2px;
+  background:
+    linear-gradient(135deg, transparent 30%, var(--win98-button-shadow) 30%, var(--win98-button-shadow) 35%, transparent 35%,
+    transparent 45%, var(--win98-button-shadow) 45%, var(--win98-button-shadow) 50%, transparent 50%,
+    transparent 60%, var(--win98-button-shadow) 60%, var(--win98-button-shadow) 65%, transparent 65%,
+    transparent 75%, var(--win98-button-shadow) 75%, var(--win98-button-shadow) 80%, transparent 80%);
+}
+
+/* Hourglass Cursor */
+.wait-cursor, .wait-cursor * {
+  cursor: wait !important;
+}
+
+/* Section Header */
+.win98-section-header {
+  padding: 3px 6px;
+  font-weight: bold;
+  font-size: var(--win98-font-size);
+  background: var(--win98-bg);
+  border-bottom: 1px solid var(--win98-button-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.win98-section-header .collapse-icon {
+  font-size: 8px;
+}
+
+/* Group Box */
+.win98-groupbox {
+  border: 1px solid var(--win98-button-shadow);
+  box-shadow: 1px 1px 0 var(--win98-button-highlight);
+  padding: 12px 8px 8px;
+  margin: 4px;
+  position: relative;
+}
+
+.win98-groupbox-label {
+  position: absolute;
+  top: -7px;
+  left: 8px;
+  background: var(--win98-bg);
+  padding: 0 4px;
+  font-size: var(--win98-font-size);
+}
